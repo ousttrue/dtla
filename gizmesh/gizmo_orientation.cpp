@@ -5,10 +5,6 @@
 namespace gizmesh
 {
 
-using fpalg::operator+;
-using fpalg::operator-;
-using fpalg::operator*;
-
 static bool dragger(const GizmoComponent &component,
                     const fpalg::Ray &worldRay, const GizmoState &state,
                     fpalg::Transform *out, bool is_local)
@@ -173,7 +169,6 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_loca
             if (mesh)
             {
                 auto localHit = localRay.SetT(best_t);
-                using fpalg::operator-;
                 auto offset = gizmoTransform.ApplyPosition(localHit) - trs.position;
                 gizmo->begin(mesh, offset, trs, {});
             }

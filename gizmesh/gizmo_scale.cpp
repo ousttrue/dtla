@@ -5,10 +5,6 @@
 namespace gizmesh
 {
 
-using fpalg::operator-;
-using fpalg::operator+;
-using fpalg::operator*;
-
 static void flush_to_zero(fpalg::float3 &f)
 {
     if (std::abs(f[0]) < 0.02f)
@@ -132,7 +128,6 @@ bool scale(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_uniform
         if (updated_state)
         {
             auto localHit = localRay.SetT(best_t);
-            using fpalg::operator-;
             auto offset = trs.transform.ApplyPosition(localHit) - trs.transform.position;
             gizmo->begin(updated_state, offset, trs, {});
         }

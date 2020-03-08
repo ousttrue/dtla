@@ -4,10 +4,6 @@
 namespace gizmesh
 {
 
-using fpalg::operator+;
-using fpalg::operator-;
-using fpalg::operator*;
-
 static bool planeDragger(const GizmoComponent &component, const fpalg::Ray &worldRay, const GizmoState &state,
                          fpalg::Transform *out, const fpalg::float3 &N)
 {
@@ -19,7 +15,6 @@ static bool planeDragger(const GizmoComponent &component, const fpalg::Ray &worl
         return false;
     }
 
-    using namespace fpalg;
     auto intersect = worldRay.SetT(t);
     out->position = intersect - state.offset;
 
@@ -148,7 +143,6 @@ bool translation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_l
         if (mesh)
         {
             auto localHit = localRay.SetT(best_t);
-            using fpalg::operator-;
             auto worldOffset = gizmoTransform.ApplyPosition(localHit) - trs.transform.position;
             fpalg::float3 axis;
             if (mesh == &componentXYZ)

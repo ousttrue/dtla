@@ -5,11 +5,6 @@ static const float tau = 6.28318530718f;
 namespace gizmesh
 {
 
-using fpalg::operator-;
-using fpalg::operator+;
-using fpalg::operator*;
-using fpalg::operator+=;
-
 void geometry_mesh::compute_normals()
 {
     static const double NORMAL_EPSILON = 0.0001;

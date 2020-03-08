@@ -5,7 +5,8 @@
 #include <wrl/client.h> // ComPtr
 #include <iostream>
 
-using namespace Microsoft::WRL;
+template <class T>
+using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 class DX11ContextImpl
 {

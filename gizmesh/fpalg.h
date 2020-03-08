@@ -22,30 +22,40 @@ inline T &size_cast(S &s)
     static_assert(sizeof(S) == sizeof(T), "must same size");
     return *((T *)&s);
 }
+} // namespace fpalg
 
-inline float3 operator-(const float3 &lhs)
+namespace std
+{
+
+// for std::array
+inline fpalg::float3 operator-(const fpalg::float3 &lhs)
 {
     return {-lhs[0], -lhs[1], -lhs[2]};
 }
-inline float3 operator+(const float3 &lhs, const float3 &rhs)
+inline fpalg::float3 operator+(const fpalg::float3 &lhs, const fpalg::float3 &rhs)
 {
     return {lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2]};
 }
-inline float3 &operator+=(float3 &lhs, const float3 &rhs)
+inline fpalg::float3 &operator+=(fpalg::float3 &lhs, const fpalg::float3 &rhs)
 {
     lhs[0] += rhs[0];
     lhs[1] += rhs[1];
     lhs[2] += rhs[2];
     return lhs;
 }
-inline float3 operator-(const float3 &lhs, const float3 &rhs)
+inline fpalg::float3 operator-(const fpalg::float3 &lhs, const fpalg::float3 &rhs)
 {
     return {lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2]};
 }
-inline float3 operator*(const float3 &lhs, float scalar)
+inline fpalg::float3 operator*(const fpalg::float3 &lhs, float scalar)
 {
     return {lhs[0] * scalar, lhs[1] * scalar, lhs[2] * scalar};
 }
+
+} // namespace std
+
+namespace fpalg
+{
 inline float3 Mul3(const float3 &lhs, const float3 &rhs)
 {
     return {lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]};
