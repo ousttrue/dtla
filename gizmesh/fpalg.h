@@ -22,6 +22,36 @@ inline T &size_cast(S &s)
     static_assert(sizeof(S) == sizeof(T), "must same size");
     return *((T *)&s);
 }
+
+struct f3
+{
+    struct xyz
+    {
+        float x;
+        float y;
+        float z;
+    };
+    xyz &value;
+
+    xyz *operator->()
+    {
+        return &value;
+    }
+
+    const xyz *operator->() const
+    {
+        return &value;
+    }
+
+    template <typename T>
+    f3(const T &t)
+        : value(*(xyz *)&t)
+    {
+        // any type that size is 4 * 3 can accepted
+        static_assert(sizeof(T) == 12, "f3");
+    }
+};
+
 } // namespace fpalg
 
 namespace std
@@ -61,9 +91,9 @@ inline float3 Mul3(const float3 &lhs, const float3 &rhs)
     return {lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]};
 }
 
-inline float Dot(const float3 &lhs, const float3 &rhs)
+inline float Dot(const f3 &lhs, const f3 &rhs)
 {
-    return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+    return lhs->x * rhs->x + lhs->y * rhs->y + lhs->z * rhs->z;
 }
 
 inline float Length(const float3 &lhs)
