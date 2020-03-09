@@ -7,6 +7,10 @@ Modification of ImGuizmo or Im3D was difficult.
 * c++20
 * d3d11
 
+fpalg library is "FloatingPointAlgebra".
+
+* use std::array as float2, float3, float4, float16.
+
 ## TODO
 
 * [ ] restore snap
@@ -75,8 +79,7 @@ system.render(
     &pIndices, &indicesBytes, &indexStride);
 ```
 
-## sample
+## example
 
-* window
-* camera manipulation
-* d3d resource and rendering
+* example/gizmesh_example_gl3 (base from tinygizmo)
+* example/gizmesh_example_d3d11

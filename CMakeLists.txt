@@ -7,5 +7,7 @@ subdirs(
     example/window_example
     example/camera_example
     gizmesh
-    example/gizmesh_example_d3d11 
+    example/gizmesh_example_d3d11
+    external/glew-2.1.0
+    example/gizmesh_example_gl3
     )
