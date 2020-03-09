@@ -1,10 +1,6 @@
-set(TARGET_NAME gizmesh)
+set(TARGET_NAME window_example)
 add_library(${TARGET_NAME}
-    gizmesh.cpp
-    geometry_mesh.cpp
-    gizmo_position.cpp
-    gizmo_orientation.cpp
-    gizmo_scale.cpp
+    Win32Window.cpp
     )
 set_property(TARGET ${TARGET_NAME}
     PROPERTY CXX_STANDARD 20
@@ -14,5 +10,4 @@ target_include_directories(${TARGET_NAME} PUBLIC
     PRIVATE
     )
 target_link_libraries(${TARGET_NAME} PUBLIC
-    fpalg
     )
