@@ -24,33 +24,31 @@ GizmoSystem::~GizmoSystem()
     delete m_impl;
 }
 
-void GizmoSystem::new_frame(
+void GizmoSystem::begin(
     const std::array<float, 3> &camera_position,
     const std::array<float, 4> &camera_rotation,
     const std::array<float, 3> &ray_origin,
     const std::array<float, 3> &ray_direction,
     bool button)
 {
-    m_impl->update({
-        camera_position,
-        camera_rotation,
-        ray_origin,
-        ray_direction,
-        button
-    });
+    m_impl->update({camera_position,
+                    camera_rotation,
+                    ray_origin,
+                    ray_direction,
+                    button});
 }
 
-void GizmoSystem::render(
-    void **pVertices, uint32_t *veticesBytes, uint32_t *vertexStride,
-    void **pIndices, uint32_t *indicesBytes, uint32_t *indexStride)
+GizmoSystem::Buffer GizmoSystem::end()
 {
     auto &r = m_impl->render();
-    *pVertices = (void *)r.vertices.data();
-    *veticesBytes = static_cast<uint32_t>(r.vertices.size() * sizeof(r.vertices[0]));
-    *vertexStride = sizeof(r.vertices[0]);
-    *pIndices = (void *)r.triangles.data();
-    *indicesBytes = static_cast<uint32_t>(r.triangles.size() * sizeof(r.triangles[0]));
-    *indexStride = sizeof(r.triangles[0]);
+    return {
+        (uint8_t *)r.vertices.data(),
+        static_cast<uint32_t>(r.vertices.size() * sizeof(r.vertices[0])),
+        static_cast<uint32_t>(sizeof(r.vertices[0])),
+        (uint8_t *)r.triangles.data(),
+        static_cast<uint32_t>(r.triangles.size() * sizeof(r.triangles[0])),
+        static_cast<uint32_t>(sizeof(r.triangles[0])),
+    };
 }
 
 // 32 bit FNV Hash

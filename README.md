@@ -25,7 +25,7 @@ gizmesh::GizmoSystem system;
 
 ```c++
 // gizmo new frame
-system.new_frame(
+system.begin(
     camera.state.position, 
     camera.state.rotation,
     camera.state.ray_origin,
@@ -59,6 +59,13 @@ teapot_a transform may updated.
 ## gizmo: render to vertex buffer
 
 ```c++
+// get vertex buffer(world space) and index buffer
+gizmesh::GizmoSystem::Buffer buffer = system.end();
+```
+
+## gizmo: vertex
+
+```c++
 // vertex format
 struct vertex
 {
@@ -67,16 +74,6 @@ struct vertex
     std::array<float, 4> color;
 };
 static_assert(sizeof(vertex) == 40, "vertex size");
-
-void *pVertices;
-uint32_t verticesBytes;
-uint32_t vertexStride;
-void *pIndices;
-uint32_t indicesBytes;
-uint32_t indexStride;
-system.render(
-    &pVertices, &verticesBytes, &vertexStride,
-    &pIndices, &indicesBytes, &indexStride);
 ```
 
 ## example

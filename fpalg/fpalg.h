@@ -604,4 +604,71 @@ struct Matrix2x3
     }
 };
 
+struct m16
+{
+    float _11, _12, _13, _14;
+    float _21, _22, _23, _24;
+    float _31, _32, _33, _34;
+    float _41, _42, _43, _44;
+};
+
+inline std::array<float, 3> MatrixToTranslation(const m16 &m)
+{
+    return {m._41, m._42, m._43};
+}
+
+template <typename T>
+std::array<float, 3> MatrixToTranslation(const T &m)
+{
+    return MatrixToTranslation(size_cast<m16>(m));
+}
+
+inline std::array<float, 4> MatrixToQuaternion(const m16 &m)
+{
+    float x, y, z, w;
+    float trace = m._11 + m._22 + m._33; // I removed + 1.0f; see discussion with Ethan
+    if (trace > 0)
+    { // I changed M_EPSILON to 0
+        float s = 0.5f / sqrtf(trace + 1.0f);
+        w = 0.25f / s;
+        x = (m._32 - m._23) * s;
+        y = (m._13 - m._31) * s;
+        z = (m._21 - m._12) * s;
+    }
+    else
+    {
+        if (m._11 > m._22 && m._22 > m._33)
+        {
+            float s = 2.0f * sqrtf(1.0f + m._11 - m._22 - m._33);
+            w = (m._32 - m._23) / s;
+            x = 0.25f * s;
+            y = (m._12 + m._21) / s;
+            z = (m._13 + m._31) / s;
+        }
+        else if (m._22 > m._33)
+        {
+            float s = 2.0f * sqrtf(1.0f + m._22 - m._11 - m._33);
+            w = (m._13 - m._31) / s;
+            x = (m._12 + m._21) / s;
+            y = 0.25f * s;
+            z = (m._23 + m._32) / s;
+        }
+        else
+        {
+            float s = 2.0f * sqrtf(1.0f + m._33 - m._11 - m._22);
+            w = (m._21 - m._12) / s;
+            x = (m._13 + m._31) / s;
+            y = (m._23 + m._32) / s;
+            z = 0.25f * s;
+        }
+    }
+    return {x, y, z, w};
+}
+
+template <typename T>
+std::array<float, 4> MatrixToQuaternion(const T &m)
+{
+    return MatrixToQuaternion(size_cast<m16>(m));
+}
+
 } // namespace fpalg

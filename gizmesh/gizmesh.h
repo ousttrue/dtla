@@ -14,16 +14,23 @@ struct GizmoSystem
     ~GizmoSystem();
 
     // Clear geometry buffer and update internal `GizmoFrameState` data
-    void new_frame(
+    void begin(
         const std::array<float, 3> &camera_position,
         const std::array<float, 4> &camera_rotation,
         const std::array<float, 3> &ray_origin,
         const std::array<float, 3> &ray_direction,
         bool button);
 
-    void render(
-        void **pVertices, uint32_t *veticesBytes, uint32_t *vertexStride,
-        void **pIndices, uint32_t *indicesBytes, uint32_t *indexStride);
+    struct Buffer
+    {
+        uint8_t *pVertices;
+        uint32_t verticesBytes;
+        uint32_t vertexStride;
+        uint8_t *pIndices;
+        uint32_t indicesBytes;
+        uint32_t indexStride;
+    };
+    Buffer end();
 };
 
 // 32 bit FNV Hash
