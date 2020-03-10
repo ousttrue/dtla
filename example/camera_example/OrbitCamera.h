@@ -33,5 +33,5 @@ struct OrbitCamera
     void CalcView(int w, int h, int x, int y);
     void CalcPerspective();
     void SetViewport(int x, int y, int w, int h);
-    void WindowInput(const screenstate::ScreenState &window);
+    void Update(const screenstate::ScreenState &window);
 };

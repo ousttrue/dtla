@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     for (int i = 0; win.Update(&state); ++i)
     {
         // update camera
-        camera.WindowInput(state);
+        camera.Update(state);
 
         // gizmo new frame
         system.new_frame(

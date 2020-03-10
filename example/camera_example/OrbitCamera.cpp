@@ -53,6 +53,7 @@ void OrbitCamera::SetViewport(int x, int y, int w, int h)
     {
         return;
     }
+
     if (h == 0 || w == 0)
     {
         aspectRatio = 1.0f;
@@ -66,9 +67,11 @@ void OrbitCamera::SetViewport(int x, int y, int w, int h)
     state.viewportWidth = w;
     state.viewportHeight = h;
     CalcPerspective();
+
+    return;
 }
 
-void OrbitCamera::WindowInput(const screenstate::ScreenState &window)
+void OrbitCamera::Update(const screenstate::ScreenState &window)
 {
     SetViewport(0, 0, window.Width, window.Height);
 
