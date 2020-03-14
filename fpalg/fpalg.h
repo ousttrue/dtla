@@ -8,6 +8,7 @@ namespace fpalg
 using float2 = std::array<float, 2>;
 using float3 = std::array<float, 3>;
 using float4 = std::array<float, 4>;
+using float16 = std::array<float, 16>;
 
 template <typename T, typename S>
 inline const T &size_cast(const S &s)
@@ -25,31 +26,28 @@ inline T &size_cast(S &s)
 
 struct f3
 {
-    struct xyz
-    {
-        float x;
-        float y;
-        float z;
-    };
-    xyz &value;
-
-    xyz *operator->()
-    {
-        return &value;
-    }
-
-    const xyz *operator->() const
-    {
-        return &value;
-    }
-
-    template <typename T>
-    f3(const T &t)
-        : value(*(xyz *)&t)
-    {
-        // any type that size is 4 * 3 can accepted
-        static_assert(sizeof(T) == 12, "f3");
-    }
+    float x;
+    float y;
+    float z;
+};
+struct f16
+{
+    float _11;
+    float _12;
+    float _13;
+    float _14;
+    float _21;
+    float _22;
+    float _23;
+    float _24;
+    float _31;
+    float _32;
+    float _33;
+    float _34;
+    float _41;
+    float _42;
+    float _43;
+    float _44;
 };
 
 } // namespace fpalg
@@ -91,9 +89,12 @@ inline float3 Mul3(const float3 &lhs, const float3 &rhs)
     return {lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]};
 }
 
-inline float Dot(const f3 &lhs, const f3 &rhs)
+template <typename T>
+inline float Dot(const T &_lhs, const T &_rhs)
 {
-    return lhs->x * rhs->x + lhs->y * rhs->y + lhs->z * rhs->z;
+    auto &lhs = size_cast<f3>(_lhs);
+    auto &rhs = size_cast<f3>(_rhs);
+    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 }
 
 inline float Length(const float3 &lhs)
@@ -167,11 +168,18 @@ inline std::array<float, 16> Mul(const float l[16], const float r[16])
         _44,
     };
 }
+} // namespace fpalg
 
-inline std::array<float, 16> operator*(const std::array<float, 16> &lhs, const std::array<float, 16> &rhs)
+namespace std
 {
-    return Mul(lhs.data(), rhs.data());
+inline fpalg::float16 operator*(const fpalg::float16 &lhs, const fpalg::float16 &rhs)
+{
+    return fpalg::Mul(lhs.data(), rhs.data());
 }
+} // namespace std
+
+namespace fpalg
+{
 
 inline void Transpose(std::array<float, 16> &m)
 {
@@ -424,6 +432,11 @@ inline std::array<float, 16> ScaleMatrix(const float3 &s)
         0, 0, 0, 1};
 }
 
+inline std::array<float, 16> ScaleMatrix(float x, float y, float z)
+{
+    return ScaleMatrix({x, y, z});
+}
+
 inline float3 QuaternionRotateFloat3(const float4 &q, const float3 &v)
 {
     auto x = QuaternionXDir(q);
@@ -481,12 +494,28 @@ struct TRS
     {
     }
 
+    TRS(const float3 &t, const float4 &r, const float3 &s)
+        : position(t), rotation(r), scale(s)
+    {
+    }
+
     std::array<float, 16> Matrix() const
     {
         return ScaleMatrix(scale) * transform.Matrix();
     }
 };
 static_assert(sizeof(TRS) == 40, "TRS");
+
+template <typename T>
+TRS Decompose(const T &_m)
+{
+    auto &m = size_cast<f16>(_m);
+    auto s1 = Length({m._11, m._12, m._13});
+    auto s2 = Length({m._21, m._22, m._23});
+    auto s3 = Length({m._31, m._32, m._33});
+    TRS trs({m._41, m._42, m._43}, MatrixToQuaternion(_m), {s1, s2, s3});
+    return trs;
+}
 
 struct Ray
 {

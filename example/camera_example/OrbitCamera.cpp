@@ -5,8 +5,6 @@
 
 void OrbitCamera::CalcView(int w, int h, int x, int y)
 {
-    using fpalg::operator*;
-
     // view transform
     auto q_yaw = fpalg::QuaternionAxisAngle({0, 1, 0}, yawRadians);
     auto q_pitch = fpalg::QuaternionAxisAngle({1, 0, 0}, pitchRadians);

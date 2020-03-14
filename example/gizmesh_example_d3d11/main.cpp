@@ -96,13 +96,12 @@ int main(int argc, char *argv[])
         camera.Update(state);
 
         // gizmo new frame
-        system.new_frame(
-            camera.state.position, 
+        system.begin(
+            camera.state.position,
             camera.state.rotation,
             camera.state.ray_origin,
             camera.state.ray_direction,
-            state.MouseLeftDown()
-            );
+            state.MouseLeftDown());
 
         if (state.KeyCode['R'])
         {
@@ -122,7 +121,6 @@ int main(int argc, char *argv[])
         }
         lastState = state.KeyCode;
 
-        using fpalg::operator*;
         auto viewProjection = camera.state.view * camera.state.projection;
 
         //
@@ -154,19 +152,10 @@ int main(int argc, char *argv[])
                 break;
             }
 
-            void *pVertices;
-            uint32_t verticesBytes;
-            uint32_t vertexStride;
-            void *pIndices;
-            uint32_t indicesBytes;
-            uint32_t indexStride;
-            system.render(
-                &pVertices, &verticesBytes, &vertexStride,
-                &pIndices, &indicesBytes, &indexStride);
-
+            auto buffer = system.end();
             gizmo_mesh->uploadMesh(device,
-                                   pVertices, verticesBytes, vertexStride,
-                                   pIndices, indicesBytes, indexStride,
+                                   buffer.pVertices, buffer.verticesBytes, buffer.vertexStride,
+                                   buffer.pIndices, buffer.indicesBytes, buffer.indexStride,
                                    true);
         }
 
