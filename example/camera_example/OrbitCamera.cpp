@@ -15,7 +15,7 @@ void OrbitCamera::CalcView(int w, int h, int x, int y)
     auto inv = transform.Inverse();
     {
         state.rotation = inv.rotation;
-        state.position = inv.position;
+        state.position = inv.translation;
     }
 
     // ray for mouse cursor

@@ -447,28 +447,28 @@ inline float3 QuaternionRotateFloat3(const float4 &q, const float3 &v)
 
 struct Transform
 {
-    float3 position{0, 0, 0};
+    float3 translation{0, 0, 0};
     float4 rotation{0, 0, 0, 1};
 
     std::array<float, 16> Matrix() const
     {
         auto r = QuaternionMatrix(rotation);
-        r[12] = position[0];
-        r[13] = position[1];
-        r[14] = position[2];
+        r[12] = translation[0];
+        r[13] = translation[1];
+        r[14] = translation[2];
         return r;
     }
 
     Transform Inverse() const
     {
         auto inv_r = QuaternionConjugate(rotation);
-        auto inv_t = QuaternionRotateFloat3(inv_r, -position);
+        auto inv_t = QuaternionRotateFloat3(inv_r, -translation);
         return {inv_t, inv_r};
     }
 
     float3 ApplyPosition(const float3 &v) const
     {
-        return QuaternionRotateFloat3(rotation, v) + position;
+        return QuaternionRotateFloat3(rotation, v) + translation;
     }
 
     float3 ApplyDirection(const float3 &v) const
@@ -483,19 +483,19 @@ struct TRS
         Transform transform;
         struct
         {
-            float3 position;
+            float3 translation;
             float4 rotation;
         };
     };
     float3 scale;
 
     TRS()
-        : position({0, 0, 0}), rotation({0, 0, 0, 1}), scale({1, 1, 1})
+        : translation({0, 0, 0}), rotation({0, 0, 0, 1}), scale({1, 1, 1})
     {
     }
 
     TRS(const float3 &t, const float4 &r, const float3 &s)
-        : position(t), rotation(r), scale(s)
+        : translation(t), rotation(r), scale(s)
     {
     }
 

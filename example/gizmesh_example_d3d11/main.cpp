@@ -75,11 +75,11 @@ int main(int argc, char *argv[])
 
     // teapot a
     fpalg::TRS teapot_a;
-    teapot_a.position = {-2, 0, 0};
+    teapot_a.translation = {-2, 0, 0};
 
     // teapot b
     fpalg::TRS teapot_b;
-    teapot_b.position = {+2, 0, 0};
+    teapot_b.translation = {+2, 0, 0};
 
     // gizmo
     gizmesh::GizmoSystem system;

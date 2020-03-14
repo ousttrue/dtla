@@ -10,16 +10,16 @@ static bool dragger(const GizmoComponent &component,
                     fpalg::Transform *out, bool is_local)
 {
     auto start_orientation = is_local ? state.original.rotation : fpalg::float4{0, 0, 0, 1};
-    fpalg::Transform original_pose = {state.original.position, start_orientation};
+    fpalg::Transform original_pose = {state.original.translation, start_orientation};
     auto the_axis = original_pose.ApplyDirection(component.axis);
-    auto t = worldRay >> fpalg::Plane{the_axis, state.original.position + state.offset};
+    auto t = worldRay >> fpalg::Plane{the_axis, state.original.translation + state.offset};
     if (t < 0)
     {
         return false;
     }
 
-    auto center_of_rotation = state.original.position + the_axis * fpalg::Dot(the_axis, state.offset);
-    auto arm1 = fpalg::Normalize(state.original.position + state.offset - center_of_rotation);
+    auto center_of_rotation = state.original.translation + the_axis * fpalg::Dot(the_axis, state.offset);
+    auto arm1 = fpalg::Normalize(state.original.translation + state.offset - center_of_rotation);
     auto arm2 = fpalg::Normalize(worldRay.SetT(t) - center_of_rotation);
     float d = fpalg::Dot(arm1, arm2);
     if (d > 0.999f)
@@ -156,7 +156,7 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_loca
 
     // assert(length2(t.orientation) > float(1e-6));
     auto worldRay = fpalg::Ray{impl->state.ray_origin, impl->state.ray_direction};
-    fpalg::Transform gizmoTransform = is_local ? trs.transform : fpalg::Transform{trs.position, {0, 0, 0, 1}}; // Orientation is local by default
+    fpalg::Transform gizmoTransform = is_local ? trs.transform : fpalg::Transform{trs.translation, {0, 0, 0, 1}}; // Orientation is local by default
 
     // raycast
     {
@@ -169,7 +169,7 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_loca
             if (mesh)
             {
                 auto localHit = localRay.SetT(best_t);
-                auto offset = gizmoTransform.ApplyPosition(localHit) - trs.position;
+                auto offset = gizmoTransform.ApplyPosition(localHit) - trs.translation;
                 gizmo->begin(mesh, offset, trs, {});
             }
         }

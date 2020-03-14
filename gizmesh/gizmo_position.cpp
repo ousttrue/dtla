@@ -8,7 +8,7 @@ static bool planeDragger(const GizmoComponent &component, const fpalg::Ray &worl
                          fpalg::Transform *out, const fpalg::float3 &N)
 {
 
-    fpalg::Plane plane(N, state.original.position + state.offset);
+    fpalg::Plane plane(N, state.original.translation + state.offset);
     auto t = worldRay >> plane;
     if (t < 0)
     {
@@ -16,7 +16,7 @@ static bool planeDragger(const GizmoComponent &component, const fpalg::Ray &worl
     }
 
     auto intersect = worldRay.SetT(t);
-    out->position = intersect - state.offset;
+    out->translation = intersect - state.offset;
 
     return true;
 }
@@ -25,7 +25,7 @@ static bool axisDragger(const GizmoComponent &component, const fpalg::Ray &world
                         fpalg::Transform *out, const fpalg::float3 &axis)
 {
     // First apply a plane translation dragger with a plane that contains the desired axis and is oriented to face the camera
-    auto plane_tangent = fpalg::Cross(axis, out->position - worldRay.origin);
+    auto plane_tangent = fpalg::Cross(axis, out->translation - worldRay.origin);
     auto plane_normal = fpalg::Cross(axis, plane_tangent);
     if (!planeDragger(component, worldRay, state, out, plane_normal))
     {
@@ -33,7 +33,7 @@ static bool axisDragger(const GizmoComponent &component, const fpalg::Ray &world
     }
 
     // Constrain object motion to be along the desired axis
-    out->position = state.original.position + axis * fpalg::Dot(out->position - state.original.position, axis);
+    out->translation = state.original.translation + axis * fpalg::Dot(out->translation - state.original.translation, axis);
     return true;
 }
 
@@ -132,7 +132,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_l
 
     // raycast
     auto worldRay = fpalg::Ray{impl->state.ray_origin, impl->state.ray_direction};
-    auto gizmoTransform = is_local ? trs.transform : fpalg::Transform{trs.transform.position, {0, 0, 0, 1}};
+    auto gizmoTransform = is_local ? trs.transform : fpalg::Transform{trs.transform.translation, {0, 0, 0, 1}};
     auto localRay = worldRay.Transform(gizmoTransform.Inverse());
     auto [mesh, best_t] = raycast(localRay);
     gizmo->hover(mesh != nullptr);
@@ -143,7 +143,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_l
         if (mesh)
         {
             auto localHit = localRay.SetT(best_t);
-            auto worldOffset = gizmoTransform.ApplyPosition(localHit) - trs.transform.position;
+            auto worldOffset = gizmoTransform.ApplyPosition(localHit) - trs.transform.translation;
             fpalg::float3 axis;
             if (mesh == &componentXYZ)
             {

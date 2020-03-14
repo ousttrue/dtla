@@ -3,4 +3,14 @@
         "fpalg",
         "gizmesh"
     ],
+    "files.associations": {
+        "*.hlsl": "c",
+        "algorithm": "cpp",
+        "fstream": "cpp",
+        "locale": "cpp",
+        "numeric": "cpp",
+        "regex": "cpp",
+        "variant": "cpp",
+        "xlocinfo": "cpp"
+    },
 }

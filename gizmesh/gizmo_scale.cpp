@@ -24,19 +24,19 @@ static bool dragger(const GizmoComponent &component,
 {
     auto plane_tangent = fpalg::Cross(
         component.axis,
-        state.original.position - worldRay.origin);
+        state.original.translation - worldRay.origin);
     auto N = fpalg::Cross(component.axis, plane_tangent);
 
     // If an intersection exists between the ray and the plane, place the object at that point
     auto t = worldRay >> fpalg::Plane{
                              N,
-                             state.original.position + state.offset};
+                             state.original.translation + state.offset};
     if (t < 0)
     {
         return false;
     }
     auto intersect = worldRay.SetT(t);
-    auto offset_on_axis = fpalg::Mul3((intersect - state.offset - state.original.position), component.axis);
+    auto offset_on_axis = fpalg::Mul3((intersect - state.offset - state.original.translation), component.axis);
     flush_to_zero(offset_on_axis);
     auto new_scale = state.original.scale + fpalg::size_cast<fpalg::float3>(offset_on_axis);
 
@@ -128,7 +128,7 @@ bool scale(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_uniform
         if (updated_state)
         {
             auto localHit = localRay.SetT(best_t);
-            auto offset = trs.transform.ApplyPosition(localHit) - trs.transform.position;
+            auto offset = trs.transform.ApplyPosition(localHit) - trs.transform.translation;
             gizmo->begin(updated_state, offset, trs, {});
         }
     }
