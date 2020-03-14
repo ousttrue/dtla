@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <limits>
+#include <vector>
 #include <math.h>
 
 namespace fpalg
@@ -22,6 +23,28 @@ inline T &size_cast(S &s)
 {
     static_assert(sizeof(S) == sizeof(T), "must same size");
     return *((T *)&s);
+}
+
+struct range
+{
+    const void *begin;
+    const void *end;
+
+    size_t size() const
+    {
+        return (uint8_t *)end - (uint8_t *)begin;
+    }
+};
+
+template <typename T, typename S>
+inline const T &vector_cast(const std::vector<S> &s)
+{
+    range r{s.data(), s.data() + s.size()};
+    if (r.size() != sizeof(T))
+    {
+        throw;
+    }
+    return *(const T *)r.begin;
 }
 
 struct f3
@@ -449,6 +472,13 @@ struct Transform
 {
     float3 translation{0, 0, 0};
     float4 rotation{0, 0, 0, 1};
+
+    Transform operator*(const Transform &rhs) const
+    {
+        return {
+            QuaternionRotateFloat3(rhs.rotation, translation) + rhs.translation,
+            QuaternionMul(rotation, rhs.rotation)};
+    }
 
     std::array<float, 16> Matrix() const
     {
