@@ -53,6 +53,10 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam,
         return 1;
 
     case WM_DESTROY:
+        if (window->OnDestroy)
+        {
+            window->OnDestroy();
+        }
         PostQuitMessage(0);
         return 0;
 

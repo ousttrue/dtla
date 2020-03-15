@@ -2,6 +2,7 @@
 #include "ScreenState.h"
 #include <Windows.h>
 #include <string>
+#include <functional>
 
 namespace screenstate
 {
@@ -22,6 +23,7 @@ public:
     void Show(int nCmdShow = SW_SHOW);
     bool Update(ScreenState *pState);
     void SetEnableSetCursor(bool enable) { m_enableSetCursor = enable; }
+    std::function<void()> OnDestroy;
 
 private:
     static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
