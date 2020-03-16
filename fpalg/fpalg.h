@@ -164,6 +164,10 @@ inline float3 Cross(const float3 &lhs, const float3 &rhs)
         lhs[0] * rhs[1] - lhs[1] * rhs[0]};
 }
 
+inline float Dot4(const std::array<float, 4> &row, const std::array<float, 4> &col)
+{
+    return row[0] * col[0] + row[1] * col[1] + row[2] * col[2] + row[3] * col[3];
+}
 inline float Dot4(const float *row, const float *col, int step = 1)
 {
     auto i = 0;
@@ -410,8 +414,12 @@ inline float4 QuaternionMulR(const float4 &lhs, const float4 &rhs)
             lhs[3] * rhs[3] - lhs[0] * rhs[0] - lhs[1] * rhs[1] - lhs[2] * rhs[2]};
 }
 template <typename T>
-inline float4 QuaternionMulL(const T &l, const T &r)
+inline float4 QuaternionMulL(const T &l, T r)
 {
+    if (Dot4(l, r) < 0)
+    {
+        r = {-r[0], -r[1], -r[2], -r[3]};
+    }
     const auto &lhs = size_cast<f4>(l);
     const auto &rhs = size_cast<f4>(r);
     return {rhs.x * lhs.w + rhs.w * lhs.x + rhs.y * lhs.z - rhs.z * lhs.y,
