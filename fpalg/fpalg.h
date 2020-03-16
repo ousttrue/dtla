@@ -71,6 +71,13 @@ struct f3
     float y;
     float z;
 };
+struct f4
+{
+    float x;
+    float y;
+    float z;
+    float w;
+};
 struct f16
 {
     float _11;
@@ -395,12 +402,22 @@ inline float4 QuaternionAxisAngle(const float3 &axis, float angle)
     return {axis[0] * sin, axis[1] * sin, axis[2] * sin, cos};
 }
 
-inline float4 QuaternionMul(const float4 &lhs, const float4 &rhs)
+inline float4 QuaternionMulR(const float4 &lhs, const float4 &rhs)
 {
     return {lhs[0] * rhs[3] + lhs[3] * rhs[0] + lhs[1] * rhs[2] - lhs[2] * rhs[1],
             lhs[1] * rhs[3] + lhs[3] * rhs[1] + lhs[2] * rhs[0] - lhs[0] * rhs[2],
             lhs[2] * rhs[3] + lhs[3] * rhs[2] + lhs[0] * rhs[1] - lhs[1] * rhs[0],
             lhs[3] * rhs[3] - lhs[0] * rhs[0] - lhs[1] * rhs[1] - lhs[2] * rhs[2]};
+}
+template <typename T>
+inline float4 QuaternionMulL(const T &l, const T &r)
+{
+    const auto &lhs = size_cast<f4>(l);
+    const auto &rhs = size_cast<f4>(r);
+    return {rhs.x * lhs.w + rhs.w * lhs.x + rhs.y * lhs.z - rhs.z * lhs.y,
+            rhs.y * lhs.w + rhs.w * lhs.y + rhs.z * lhs.x - rhs.x * lhs.z,
+            rhs.z * lhs.w + rhs.w * lhs.z + rhs.x * lhs.y - rhs.y * lhs.x,
+            rhs.w * lhs.w - rhs.x * lhs.x - rhs.y * lhs.y - rhs.z * lhs.z};
 }
 // inline float4 operator*(const float4 &lhs, const float4 &rhs)
 // {
@@ -495,7 +512,7 @@ struct Transform
     {
         return {
             QuaternionRotateFloat3(rhs.rotation, translation) + rhs.translation,
-            QuaternionMul(rotation, rhs.rotation)};
+            QuaternionMulL(rotation, rhs.rotation)};
     }
 
     std::array<float, 16> Matrix() const

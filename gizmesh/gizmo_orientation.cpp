@@ -34,7 +34,7 @@ static bool dragger(const GizmoComponent &component,
     }
 
     auto a = fpalg::Normalize(fpalg::Cross(arm1, arm2));
-    out->rotation = fpalg::QuaternionMul(
+    out->rotation = fpalg::QuaternionMulR(
         fpalg::QuaternionAxisAngle(a, angle),
         start_orientation);
     return true;
@@ -186,7 +186,7 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_loca
         dragger(*active, worldRay, gizmo->m_state, &gizmoTransform, is_local);
         if (!is_local)
         {
-            trs.rotation = fpalg::QuaternionMul(gizmoTransform.rotation, gizmo->m_state.original.rotation);
+            trs.rotation = fpalg::QuaternionMulR(gizmoTransform.rotation, gizmo->m_state.original.rotation);
         }
         else
         {

@@ -45,5 +45,5 @@ TEST_CASE("Transform", "[order]")
 
     auto b = fpalg::Transform{{1, 0, 0}, fpalg::QuaternionAxisAngle({0, 1, 0}, 90.0f * fpalg::TO_RADIANS)};
     auto c = (a * b).ApplyPosition({1, 0, 0});
-    REQUIRE(c == std::array<float, 3>{1, 0, -2});
+    REQUIRE(fpalg::Nearly(c, std::array<float, 3>{1, 0, -2}));
 }

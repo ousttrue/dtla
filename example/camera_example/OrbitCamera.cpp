@@ -8,7 +8,7 @@ void OrbitCamera::CalcView(int w, int h, int x, int y)
     // view transform
     auto q_yaw = fpalg::QuaternionAxisAngle({0, 1, 0}, yawRadians);
     auto q_pitch = fpalg::QuaternionAxisAngle({1, 0, 0}, pitchRadians);
-    auto transform = fpalg::Transform{shift, fpalg::QuaternionMul(q_pitch, q_yaw)};
+    auto transform = fpalg::Transform{shift, fpalg::QuaternionMulR(q_pitch, q_yaw)};
     state.view = transform.Matrix();
 
     // inverse view transform
