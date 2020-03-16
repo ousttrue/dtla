@@ -2,6 +2,7 @@
 #include <array>
 #include <limits>
 #include <vector>
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 namespace fpalg
@@ -10,6 +11,23 @@ using float2 = std::array<float, 2>;
 using float3 = std::array<float, 3>;
 using float4 = std::array<float, 4>;
 using float16 = std::array<float, 16>;
+
+const float PI = (float)M_PI;
+const float TO_RADIANS = PI / 180.0f;
+
+template <size_t N>
+inline bool Nearly(const std::array<float, N> &lhs, const std::array<float, N> &rhs)
+{
+    const auto EPSILON = 1e-5f;
+    for (int i = 0; i < N; ++i)
+    {
+        if (abs(lhs[i] - rhs[i]) > EPSILON)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
 template <typename T, typename S>
 inline const T &size_cast(const S &s)

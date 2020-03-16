@@ -36,3 +36,14 @@ TEST_CASE("f16", "[decomposition]")
         REQUIRE(trs.scale == std::array<float, 3>{1, 2, 3});
     }
 }
+
+TEST_CASE("Transform", "[order]")
+{
+    auto a = fpalg::Transform{{1, 0, 0}, fpalg::QuaternionAxisAngle({1, 0, 0}, 90.0f * fpalg::TO_RADIANS)};
+    auto aa = a.ApplyPosition({1, 2, 3});
+    REQUIRE(fpalg::Nearly(aa, std::array<float, 3>{2, -3, 2}));
+
+    auto b = fpalg::Transform{{1, 0, 0}, fpalg::QuaternionAxisAngle({0, 1, 0}, 90.0f * fpalg::TO_RADIANS)};
+    auto c = (a * b).ApplyPosition({1, 0, 0});
+    REQUIRE(c == std::array<float, 3>{1, 0, -2});
+}
