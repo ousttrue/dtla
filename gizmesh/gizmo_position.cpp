@@ -137,7 +137,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
     // auto gizmoTransform = falg::Transform{t, is_local ? r : falg::float4{0, 0, 0, 1}};
     if (parent)
     {
-        gizmoTransform = *parent * gizmoTransform;
+        gizmoTransform = gizmoTransform * *parent;
     }
     if (is_local)
     {
