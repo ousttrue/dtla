@@ -16,6 +16,7 @@ TEST_CASE("f16", "[decomposition]")
         auto trs = fpalg::Decompose(t);
         REQUIRE(trs.translation == std::array<float, 3>{1, 2, 3});
         REQUIRE(trs.rotation == std::array<float, 4>{0, 0, 0, 1});
+        REQUIRE(fpalg::Nearly(trs.rotation, std::array<float, 4>{0, 0, 0, 1}));
     }
 
     {

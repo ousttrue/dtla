@@ -15,20 +15,6 @@ using float16 = std::array<float, 16>;
 const float PI = (float)M_PI;
 const float TO_RADIANS = PI / 180.0f;
 
-template <size_t N>
-inline bool Nearly(const std::array<float, N> &lhs, const std::array<float, N> &rhs)
-{
-    const auto EPSILON = 1e-5f;
-    for (int i = 0; i < N; ++i)
-    {
-        if (abs(lhs[i] - rhs[i]) > EPSILON)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
 template <typename T, typename S>
 inline const T &size_cast(const S &s)
 {
@@ -100,6 +86,9 @@ struct f16
 
 } // namespace fpalg
 
+/////////////////////////////////////////////////////////////////////////////
+// std
+/////////////////////////////////////////////////////////////////////////////
 namespace std
 {
 
@@ -130,8 +119,52 @@ inline fpalg::float3 operator*(const fpalg::float3 &lhs, float scalar)
 
 } // namespace std
 
+/////////////////////////////////////////////////////////////////////////////
+// fpalg
+/////////////////////////////////////////////////////////////////////////////
 namespace fpalg
 {
+
+template <size_t MOD, size_t N>
+struct mul4
+{
+    // SFINAE for MOD not 0
+};
+template <size_t N>
+struct mul4<0, N>
+{
+    static const size_t value = N;
+};
+template <typename T>
+struct float_array
+{
+    static const size_t length = mul4<sizeof(T) % 4, sizeof(T) / 4>::value;
+    using type = std::array<float, length>;
+    template <typename S>
+    static const type &cast(const S &s)
+    {
+        return size_cast<type>(s);
+    }
+};
+
+template <typename T>
+inline bool Nearly(const T &lhs, const T &rhs)
+{
+    using ARRAY = float_array<T>;
+    auto &l = ARRAY::cast(lhs);
+    auto &r = ARRAY::cast(rhs);
+
+    const auto EPSILON = 1e-5f;
+    for (size_t i = 0; i < ARRAY::length; ++i)
+    {
+        if (abs(l[i] - r[i]) > EPSILON)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 inline float3 Mul3(const float3 &lhs, const float3 &rhs)
 {
     return {lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]};
