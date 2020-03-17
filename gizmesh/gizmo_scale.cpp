@@ -5,7 +5,7 @@
 namespace gizmesh
 {
 
-static void flush_to_zero(fpalg::float3 &f)
+static void flush_to_zero(falg::float3 &f)
 {
     if (std::abs(f[0]) < 0.02f)
         f[0] = 0.f;
@@ -19,16 +19,16 @@ template <typename T>
 T clamp(const T &val, const T &min, const T &max) { return std::min(std::max(val, min), max); }
 
 static bool dragger(const GizmoComponent &component,
-                    const fpalg::Ray &worldRay, const GizmoState &state,
-                    fpalg::TRS *out, bool uniform)
+                    const falg::Ray &worldRay, const GizmoState &state,
+                    falg::TRS *out, bool uniform)
 {
-    auto plane_tangent = fpalg::Cross(
+    auto plane_tangent = falg::Cross(
         component.axis,
         state.original.translation - worldRay.origin);
-    auto N = fpalg::Cross(component.axis, plane_tangent);
+    auto N = falg::Cross(component.axis, plane_tangent);
 
     // If an intersection exists between the ray and the plane, place the object at that point
-    auto t = worldRay >> fpalg::Plane{
+    auto t = worldRay >> falg::Plane{
                              N,
                              state.original.translation + state.offset};
     if (t < 0)
@@ -36,18 +36,18 @@ static bool dragger(const GizmoComponent &component,
         return false;
     }
     auto intersect = worldRay.SetT(t);
-    auto offset_on_axis = fpalg::Mul3((intersect - state.offset - state.original.translation), component.axis);
+    auto offset_on_axis = falg::Mul3((intersect - state.offset - state.original.translation), component.axis);
     flush_to_zero(offset_on_axis);
-    auto new_scale = state.original.scale + fpalg::size_cast<fpalg::float3>(offset_on_axis);
+    auto new_scale = state.original.scale + falg::size_cast<falg::float3>(offset_on_axis);
 
     if (uniform)
     {
-        auto s = clamp(fpalg::Dot(intersect, new_scale), 0.01f, 1000.f);
-        out->scale = fpalg::float3{s, s, s};
+        auto s = clamp(falg::Dot(intersect, new_scale), 0.01f, 1000.f);
+        out->scale = falg::float3{s, s, s};
     }
     else
     {
-        out->scale = fpalg::float3{
+        out->scale = falg::float3{
             clamp(new_scale[0], 0.01f, 1000.f),
             clamp(new_scale[1], 0.01f, 1000.f),
             clamp(new_scale[2], 0.01f, 1000.f)};
@@ -56,7 +56,7 @@ static bool dragger(const GizmoComponent &component,
     return true;
 }
 
-static fpalg::float2 mace_points[] = {{0.25f, 0}, {0.25f, 0.05f}, {1, 0.05f}, {1, 0.1f}, {1.25f, 0.1f}, {1.25f, 0}};
+static falg::float2 mace_points[] = {{0.25f, 0}, {0.25f, 0.05f}, {1, 0.05f}, {1, 0.1f}, {1.25f, 0.1f}, {1.25f, 0}};
 
 static GizmoComponent xComponent{
     geometry_mesh::make_lathed_geometry({1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 16, mace_points, _countof(mace_points)),
@@ -76,7 +76,7 @@ static GizmoComponent zComponent{
 
 static const GizmoComponent *g_meshes[] = {&xComponent, &yComponent, &zComponent};
 
-static std::pair<const GizmoComponent *, float> raycast(const fpalg::Ray &ray)
+static std::pair<const GizmoComponent *, float> raycast(const falg::Ray &ray)
 {
     const GizmoComponent *updated_state = nullptr;
     float best_t = std::numeric_limits<float>::infinity();
@@ -92,7 +92,7 @@ static std::pair<const GizmoComponent *, float> raycast(const fpalg::Ray &ray)
     return std::make_pair(updated_state, best_t);
 }
 
-static void draw(const fpalg::Transform &t, std::vector<gizmo_renderable> &drawlist, const GizmoComponent *activeMesh)
+static void draw(const falg::Transform &t, std::vector<gizmo_renderable> &drawlist, const GizmoComponent *activeMesh)
 {
     for (auto mesh : g_meshes)
     {
@@ -113,12 +113,12 @@ static void draw(const fpalg::Transform &t, std::vector<gizmo_renderable> &drawl
 namespace handle
 {
 
-bool scale(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_uniform)
+bool scale(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_uniform)
 {
     auto &impl = ctx.m_impl;
     auto [gizmo, created] = impl->get_or_create_gizmo(id);
 
-    auto worldRay = fpalg::Ray{impl->state.ray_origin, impl->state.ray_direction};
+    auto worldRay = falg::Ray{impl->state.ray_origin, impl->state.ray_direction};
     auto localRay = worldRay.Transform(trs.transform.Inverse());
 
     if (impl->state.has_clicked)

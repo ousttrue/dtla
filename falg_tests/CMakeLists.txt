@@ -1,4 +1,4 @@
-set(TARGET_NAME fpalg_tests)
+set(TARGET_NAME falg_tests)
 add_executable(${TARGET_NAME}
     main.cpp
     )

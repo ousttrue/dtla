@@ -7,17 +7,17 @@ namespace gizmesh
 struct GizmoState
 {
     // Offset from position of grabbed object to coordinates of clicked point
-    fpalg::TRS original;
-    fpalg::float3 offset;
-    fpalg::float3 axis;
+    falg::TRS original;
+    falg::float3 offset;
+    falg::float3 axis;
 };
 
 struct GizmoComponent
 {
     geometry_mesh mesh;
-    fpalg::float4 base_color;
-    fpalg::float4 highlight_color;
-    fpalg::float3 axis;
+    falg::float4 base_color;
+    falg::float4 highlight_color;
+    falg::float3 axis;
 };
 
 class Gizmo
@@ -40,7 +40,7 @@ public:
         m_active = nullptr;
     }
 
-    void begin(const GizmoComponent *pMesh, const fpalg::float3 &offset, const fpalg::TRS &t, const fpalg::float3 &axis)
+    void begin(const GizmoComponent *pMesh, const falg::float3 &offset, const falg::TRS &t, const falg::float3 &axis)
     {
         m_active = pMesh;
         m_state = {

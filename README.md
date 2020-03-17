@@ -7,7 +7,7 @@ Modification of ImGuizmo or Im3D was difficult.
 * c++20
 * d3d11
 
-fpalg library is "FloatingPointAlgebra".
+falg library is "FloatingPointAlgebra".
 
 * use std::array as float2, float3, float4, float16.
 
@@ -43,13 +43,13 @@ gizmo receive only 5 params.
 namespace gizmesh::handle
 {
 
-bool translation(const GizmoSystem &system, uint32_t id, fpalg::TRS &t, bool is_local);
-bool rotation(const GizmoSystem &system, uint32_t id, fpalg::TRS &t, bool is_local);
-bool scale(const GizmoSystem &system, uint32_t id, fpalg::TRS &t, bool is_uniform);
+bool translation(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_local);
+bool rotation(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_local);
+bool scale(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_uniform);
 
 } // namespace gizmesh::handle
 
-fpalg::TRS teapot_a;
+falg::TRS teapot_a;
 teapot_a.position = {-2, 0, 0};
 gizmesh::handle::translation(system, gizmesh::hash_fnv1a("first-example-gizmo"), teapot_a, is_local);
 ```

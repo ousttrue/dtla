@@ -73,11 +73,11 @@ int main(int argc, char *argv[])
                             false);
 
     // teapot a
-    fpalg::TRS teapot_a;
+    falg::TRS teapot_a;
     teapot_a.translation = {-2, 0, 0};
 
     // teapot b
-    fpalg::TRS teapot_b;
+    falg::TRS teapot_b;
     teapot_b.translation = {+2, 0, 0};
 
     // gizmo

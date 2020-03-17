@@ -6,22 +6,22 @@ namespace gizmesh
 {
 
 static bool dragger(const GizmoComponent &component,
-                    const fpalg::Ray &worldRay, const GizmoState &state,
-                    fpalg::Transform *out, bool is_local)
+                    const falg::Ray &worldRay, const GizmoState &state,
+                    falg::Transform *out, bool is_local)
 {
-    auto start_orientation = is_local ? state.original.rotation : fpalg::float4{0, 0, 0, 1};
-    fpalg::Transform original_pose = {state.original.translation, start_orientation};
+    auto start_orientation = is_local ? state.original.rotation : falg::float4{0, 0, 0, 1};
+    falg::Transform original_pose = {state.original.translation, start_orientation};
     auto the_axis = original_pose.ApplyDirection(component.axis);
-    auto t = worldRay >> fpalg::Plane{the_axis, state.original.translation + state.offset};
+    auto t = worldRay >> falg::Plane{the_axis, state.original.translation + state.offset};
     if (t < 0)
     {
         return false;
     }
 
-    auto center_of_rotation = state.original.translation + the_axis * fpalg::Dot(the_axis, state.offset);
-    auto arm1 = fpalg::Normalize(state.original.translation + state.offset - center_of_rotation);
-    auto arm2 = fpalg::Normalize(worldRay.SetT(t) - center_of_rotation);
-    float d = fpalg::Dot(arm1, arm2);
+    auto center_of_rotation = state.original.translation + the_axis * falg::Dot(the_axis, state.offset);
+    auto arm1 = falg::Normalize(state.original.translation + state.offset - center_of_rotation);
+    auto arm2 = falg::Normalize(worldRay.SetT(t) - center_of_rotation);
+    float d = falg::Dot(arm1, arm2);
     if (d > 0.999f)
     {
         return false;
@@ -33,14 +33,14 @@ static bool dragger(const GizmoComponent &component,
         return false;
     }
 
-    auto a = fpalg::Normalize(fpalg::Cross(arm1, arm2));
-    out->rotation = fpalg::QuaternionMulR(
-        fpalg::QuaternionAxisAngle(a, angle),
+    auto a = falg::Normalize(falg::Cross(arm1, arm2));
+    out->rotation = falg::QuaternionMulR(
+        falg::QuaternionAxisAngle(a, angle),
         start_orientation);
     return true;
 }
 
-static fpalg::float2 ring_points[] = {{+0.025f, 1}, {-0.025f, 1}, {-0.025f, 1}, {-0.025f, 1.1f}, {-0.025f, 1.1f}, {+0.025f, 1.1f}, {+0.025f, 1.1f}, {+0.025f, 1}};
+static falg::float2 ring_points[] = {{+0.025f, 1}, {-0.025f, 1}, {-0.025f, 1}, {-0.025f, 1.1f}, {-0.025f, 1.1f}, {+0.025f, 1.1f}, {+0.025f, 1.1f}, {+0.025f, 1}};
 
 static GizmoComponent componentX{
     geometry_mesh::make_lathed_geometry({1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 32, ring_points, _countof(ring_points), 0.003f),
@@ -67,7 +67,7 @@ static const GizmoComponent *orientation_components[] = {
     &componentZ,
 };
 
-inline std::pair<const GizmoComponent *, float> raycast(const fpalg::Ray &ray)
+inline std::pair<const GizmoComponent *, float> raycast(const falg::Ray &ray)
 {
     const GizmoComponent *updated_state = nullptr;
     float best_t = std::numeric_limits<float>::infinity();
@@ -84,10 +84,10 @@ inline std::pair<const GizmoComponent *, float> raycast(const fpalg::Ray &ray)
 }
 
 static void draw_global_active(std::vector<gizmo_renderable> &drawlist,
-                               const fpalg::Transform &gizmoTransform, const GizmoComponent *active,
+                               const falg::Transform &gizmoTransform, const GizmoComponent *active,
                                const GizmoState &state)
 {
-    // auto modelMatrix = fpalg::size_cast<minalg::float4x4>(gizmoTransform.matrix());
+    // auto modelMatrix = falg::size_cast<minalg::float4x4>(gizmoTransform.matrix());
 
     // For non-local transformations, we only present one rotation ring
     // and draw an arrow from the center of the gizmo to indicate the degree of rotation
@@ -105,21 +105,21 @@ static void draw_global_active(std::vector<gizmo_renderable> &drawlist,
     {
         // Create orthonormal basis for drawing the arrow
         auto a = gizmoTransform.ApplyDirection(state.offset);
-        auto zDir = fpalg::Normalize(active->axis);
-        auto xDir = fpalg::Normalize(fpalg::Cross(a, zDir));
-        auto yDir = fpalg::Cross(zDir, xDir);
+        auto zDir = falg::Normalize(active->axis);
+        auto xDir = falg::Normalize(falg::Cross(a, zDir));
+        auto yDir = falg::Cross(zDir, xDir);
 
         // Ad-hoc geometry
-        fpalg::float2 arrow_points[] = {{0.0f, 0.f}, {0.0f, 0.05f}, {0.8f, 0.05f}, {0.9f, 0.10f}, {1.0f, 0}};
+        falg::float2 arrow_points[] = {{0.0f, 0.f}, {0.0f, 0.05f}, {0.8f, 0.05f}, {0.9f, 0.10f}, {1.0f, 0}};
         auto geo = geometry_mesh::make_lathed_geometry(
-            fpalg::size_cast<fpalg::float3>(yDir),
-            fpalg::size_cast<fpalg::float3>(xDir),
-            fpalg::size_cast<fpalg::float3>(zDir),
+            falg::size_cast<falg::float3>(yDir),
+            falg::size_cast<falg::float3>(xDir),
+            falg::size_cast<falg::float3>(zDir),
             32, arrow_points, _countof(arrow_points));
 
         gizmo_renderable r;
         r.mesh = geo;
-        r.color = fpalg::float4{1, 1, 1, 1};
+        r.color = falg::float4{1, 1, 1, 1};
         for (auto &v : r.mesh.vertices)
         {
             v.position = gizmoTransform.ApplyPosition(v.position);
@@ -129,7 +129,7 @@ static void draw_global_active(std::vector<gizmo_renderable> &drawlist,
     }
 }
 
-static void draw(std::vector<gizmo_renderable> &drawlist, const fpalg::Transform &gizmoTransform, const GizmoComponent *active)
+static void draw(std::vector<gizmo_renderable> &drawlist, const falg::Transform &gizmoTransform, const GizmoComponent *active)
 {
     for (auto mesh : orientation_components)
     {
@@ -149,14 +149,14 @@ static void draw(std::vector<gizmo_renderable> &drawlist, const fpalg::Transform
 namespace handle
 {
 
-bool rotation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_local)
+bool rotation(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_local)
 {
     auto &impl = ctx.m_impl;
     auto [gizmo, created] = impl->get_or_create_gizmo(id);
 
     // assert(length2(t.orientation) > float(1e-6));
-    auto worldRay = fpalg::Ray{impl->state.ray_origin, impl->state.ray_direction};
-    fpalg::Transform gizmoTransform = is_local ? trs.transform : fpalg::Transform{trs.translation, {0, 0, 0, 1}}; // Orientation is local by default
+    auto worldRay = falg::Ray{impl->state.ray_origin, impl->state.ray_direction};
+    falg::Transform gizmoTransform = is_local ? trs.transform : falg::Transform{trs.translation, {0, 0, 0, 1}}; // Orientation is local by default
 
     // raycast
     {
@@ -186,7 +186,7 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, fpalg::TRS &trs, bool is_loca
         dragger(*active, worldRay, gizmo->m_state, &gizmoTransform, is_local);
         if (!is_local)
         {
-            trs.rotation = fpalg::QuaternionMulR(gizmoTransform.rotation, gizmo->m_state.original.rotation);
+            trs.rotation = falg::QuaternionMulR(gizmoTransform.rotation, gizmo->m_state.original.rotation);
         }
         else
         {

@@ -27,10 +27,10 @@
             "externalConsole": false
         },
         {
-            "name": "fpalg_tests",
+            "name": "falg_tests",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/fpalg_tests/fpalg_tests.exe",
+            "program": "${workspaceFolder}/build/falg_tests/falg_tests.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

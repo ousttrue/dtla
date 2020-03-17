@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-namespace fpalg
+namespace falg
 {
 using float2 = std::array<float, 2>;
 using float3 = std::array<float, 3>;
@@ -84,7 +84,7 @@ struct f16
     float _44;
 };
 
-} // namespace fpalg
+} // namespace falg
 
 /////////////////////////////////////////////////////////////////////////////
 // std
@@ -93,26 +93,26 @@ namespace std
 {
 
 // for std::array
-inline fpalg::float3 operator-(const fpalg::float3 &lhs)
+inline falg::float3 operator-(const falg::float3 &lhs)
 {
     return {-lhs[0], -lhs[1], -lhs[2]};
 }
-inline fpalg::float3 operator+(const fpalg::float3 &lhs, const fpalg::float3 &rhs)
+inline falg::float3 operator+(const falg::float3 &lhs, const falg::float3 &rhs)
 {
     return {lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2]};
 }
-inline fpalg::float3 &operator+=(fpalg::float3 &lhs, const fpalg::float3 &rhs)
+inline falg::float3 &operator+=(falg::float3 &lhs, const falg::float3 &rhs)
 {
     lhs[0] += rhs[0];
     lhs[1] += rhs[1];
     lhs[2] += rhs[2];
     return lhs;
 }
-inline fpalg::float3 operator-(const fpalg::float3 &lhs, const fpalg::float3 &rhs)
+inline falg::float3 operator-(const falg::float3 &lhs, const falg::float3 &rhs)
 {
     return {lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2]};
 }
-inline fpalg::float3 operator*(const fpalg::float3 &lhs, float scalar)
+inline falg::float3 operator*(const falg::float3 &lhs, float scalar)
 {
     return {lhs[0] * scalar, lhs[1] * scalar, lhs[2] * scalar};
 }
@@ -120,9 +120,9 @@ inline fpalg::float3 operator*(const fpalg::float3 &lhs, float scalar)
 } // namespace std
 
 /////////////////////////////////////////////////////////////////////////////
-// fpalg
+// falg
 /////////////////////////////////////////////////////////////////////////////
-namespace fpalg
+namespace falg
 {
 
 template <size_t MOD, size_t N>
@@ -253,17 +253,17 @@ inline std::array<float, 16> Mul(const float l[16], const float r[16])
         _44,
     };
 }
-} // namespace fpalg
+} // namespace falg
 
 namespace std
 {
-inline fpalg::float16 operator*(const fpalg::float16 &lhs, const fpalg::float16 &rhs)
+inline falg::float16 operator*(const falg::float16 &lhs, const falg::float16 &rhs)
 {
-    return fpalg::Mul(lhs.data(), rhs.data());
+    return falg::Mul(lhs.data(), rhs.data());
 }
 } // namespace std
 
-namespace fpalg
+namespace falg
 {
 
 inline void Transpose(std::array<float, 16> &m)
@@ -642,12 +642,12 @@ struct Ray
         direction = ray.direction;
     }
 
-    Ray ToLocal(const fpalg::Transform &t) const
+    Ray ToLocal(const falg::Transform &t) const
     {
         auto toLocal = t.Inverse();
         return {
             toLocal.ApplyPosition(origin),
-            fpalg::QuaternionRotateFloat3(toLocal.rotation, direction)};
+            falg::QuaternionRotateFloat3(toLocal.rotation, direction)};
     }
 
     float3 SetT(float t) const
@@ -655,7 +655,7 @@ struct Ray
         return origin + direction * t;
     }
 
-    Ray Transform(const fpalg::Transform &t) const
+    Ray Transform(const falg::Transform &t) const
     {
         return {
             t.ApplyPosition(origin),
@@ -806,4 +806,4 @@ std::array<float, 4> MatrixToQuaternion(const T &m)
     return MatrixToQuaternion(size_cast<m16>(m));
 }
 
-} // namespace fpalg
+} // namespace falg

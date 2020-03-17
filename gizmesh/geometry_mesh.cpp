@@ -19,7 +19,7 @@ void geometry_mesh::compute_normals()
             for (auto j = i + 1; j < this->vertices.size(); ++j)
             {
                 auto v1 = this->vertices[j].position;
-                if (fpalg::Length(v1 - v0) < NORMAL_EPSILON)
+                if (falg::Length(v1 - v0) < NORMAL_EPSILON)
                 {
                     uniqueVertIndices[j] = uniqueVertIndices[i];
                 }
@@ -35,7 +35,7 @@ void geometry_mesh::compute_normals()
         idx2 = uniqueVertIndices[t[2]] - 1;
 
         geometry_vertex &v0 = this->vertices[idx0], &v1 = this->vertices[idx1], &v2 = this->vertices[idx2];
-        auto n = fpalg::Cross(v1.position - v0.position, v2.position - v0.position);
+        auto n = falg::Cross(v1.position - v0.position, v2.position - v0.position);
         v0.normal += n;
         v1.normal += n;
         v2.normal += n;
@@ -44,10 +44,10 @@ void geometry_mesh::compute_normals()
     for (uint32_t i = 0; i < this->vertices.size(); ++i)
         this->vertices[i].normal = this->vertices[uniqueVertIndices[i] - 1].normal;
     for (geometry_vertex &v : this->vertices)
-        v.normal = fpalg::Normalize(v.normal);
+        v.normal = falg::Normalize(v.normal);
 }
 
-geometry_mesh geometry_mesh::make_box_geometry(const fpalg::float3 &min_bounds, const fpalg::float3 &max_bounds)
+geometry_mesh geometry_mesh::make_box_geometry(const falg::float3 &min_bounds, const falg::float3 &max_bounds)
 {
     auto a = min_bounds;
     auto b = max_bounds;
@@ -85,7 +85,7 @@ geometry_mesh geometry_mesh::make_box_geometry(const fpalg::float3 &min_bounds, 
     return mesh;
 }
 
-geometry_mesh geometry_mesh::make_cylinder_geometry(const fpalg::float3 &axis, const fpalg::float3 &arm1, const fpalg::float3 &arm2, uint32_t slices)
+geometry_mesh geometry_mesh::make_cylinder_geometry(const falg::float3 &axis, const falg::float3 &arm1, const falg::float3 &arm2, uint32_t slices)
 {
     // Generated curved surface
     geometry_mesh mesh;
@@ -94,8 +94,8 @@ geometry_mesh geometry_mesh::make_cylinder_geometry(const fpalg::float3 &axis, c
     {
         const float tex_s = static_cast<float>(i) / slices, angle = (float)(i % slices) * tau / slices;
         auto arm = arm1 * std::cos(angle) + arm2 * std::sin(angle);
-        mesh.vertices.push_back({arm, fpalg::Normalize(arm)});
-        mesh.vertices.push_back({arm + axis, fpalg::Normalize(arm)});
+        mesh.vertices.push_back({arm, falg::Normalize(arm)});
+        mesh.vertices.push_back({arm + axis, falg::Normalize(arm)});
     }
     for (uint32_t i = 0; i < slices; ++i)
     {
@@ -114,8 +114,8 @@ geometry_mesh geometry_mesh::make_cylinder_geometry(const fpalg::float3 &axis, c
     {
         const float angle = static_cast<float>(i % slices) * tau / slices, c = std::cos(angle), s = std::sin(angle);
         auto arm = arm1 * c + arm2 * s;
-        mesh.vertices.push_back({arm + axis, fpalg::Normalize(axis)});
-        mesh.vertices.push_back({arm, -fpalg::Normalize(axis)});
+        mesh.vertices.push_back({arm + axis, falg::Normalize(axis)});
+        mesh.vertices.push_back({arm, -falg::Normalize(axis)});
     }
     for (uint32_t i = 2; i < slices; ++i)
     {
@@ -130,8 +130,8 @@ geometry_mesh geometry_mesh::make_cylinder_geometry(const fpalg::float3 &axis, c
     return mesh;
 }
 
-geometry_mesh geometry_mesh::make_lathed_geometry(const fpalg::float3 &axis, const fpalg::float3 &arm1, const fpalg::float3 &arm2, int slices,
-                                                  const fpalg::float2 *points, uint32_t pointCount, const float eps)
+geometry_mesh geometry_mesh::make_lathed_geometry(const falg::float3 &axis, const falg::float3 &arm1, const falg::float3 &arm2, int slices,
+                                                  const falg::float2 *points, uint32_t pointCount, const float eps)
 {
     geometry_mesh mesh;
     for (int i = 0; i <= slices; ++i)
@@ -139,12 +139,12 @@ geometry_mesh geometry_mesh::make_lathed_geometry(const fpalg::float3 &axis, con
         const float angle = (static_cast<float>(i % slices) * tau / slices) + (tau / 8.f);
         const float c = std::cos(angle);
         const float s = std::sin(angle);
-        fpalg::Matrix2x3 mat{axis, arm1 * c + arm2 * s};
+        falg::Matrix2x3 mat{axis, arm1 * c + arm2 * s};
         for (uint32_t j = 0; j < pointCount; ++j)
         {
             auto &p = points[j];
             // 2D to 3D
-            auto v = mat.Apply(p) + fpalg::float3{eps, eps, eps};
+            auto v = mat.Apply(p) + falg::float3{eps, eps, eps};
             mesh.vertices.push_back({v, {0, 0, 0}});
         }
 
@@ -170,15 +170,15 @@ geometry_mesh geometry_mesh::make_lathed_geometry(const fpalg::float3 &axis, con
     return mesh;
 }
 
-float operator>>(const fpalg::Ray &ray, const geometry_mesh &mesh)
+float operator>>(const falg::Ray &ray, const geometry_mesh &mesh)
 {
     float best_t = std::numeric_limits<float>::infinity();
     for (auto it = mesh.triangles.begin(); it != mesh.triangles.end(); it += 3)
     {
-        auto t = ray >> fpalg::Triangle{
-                            fpalg::size_cast<fpalg::float3>(mesh.vertices[it[0]].position),
-                            fpalg::size_cast<fpalg::float3>(mesh.vertices[it[1]].position),
-                            fpalg::size_cast<fpalg::float3>(mesh.vertices[it[2]].position)};
+        auto t = ray >> falg::Triangle{
+                            falg::size_cast<falg::float3>(mesh.vertices[it[0]].position),
+                            falg::size_cast<falg::float3>(mesh.vertices[it[1]].position),
+                            falg::size_cast<falg::float3>(mesh.vertices[it[2]].position)};
         if (t < best_t)
         {
             best_t = t;

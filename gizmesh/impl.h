@@ -1,7 +1,7 @@
 #pragma once
 #include "gizmo.h"
 #include <unordered_map>
-#include <fpalg.h>
+#include <falg.h>
 
 namespace gizmesh
 {
@@ -26,7 +26,7 @@ struct GizmoFrameState
 struct gizmo_renderable
 {
     geometry_mesh mesh;
-    fpalg::float4 color;
+    falg::float4 color;
 };
 
 struct gizmo_system_impl

@@ -37,13 +37,13 @@ struct GizmoSystem
 uint32_t hash_fnv1a(const std::string &str);
 } // namespace gizmesh
 
-#include "fpalg.h"
+#include "falg.h"
 
 namespace gizmesh::handle
 {
 
-bool translation(const GizmoSystem &system, uint32_t id, fpalg::TRS &t, bool is_local);
-bool rotation(const GizmoSystem &system, uint32_t id, fpalg::TRS &t, bool is_local);
-bool scale(const GizmoSystem &system, uint32_t id, fpalg::TRS &t, bool is_uniform);
+bool translation(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_local);
+bool rotation(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_local);
+bool scale(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_uniform);
 
 } // namespace gizmesh::handle

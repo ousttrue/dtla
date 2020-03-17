@@ -1,14 +1,14 @@
 #include "OrbitCamera.h"
-#include "fpalg.h"
+#include "falg.h"
 #define _USE_MATH_DEFINES
 #include <cmath>
 
 void OrbitCamera::CalcView(int w, int h, int x, int y)
 {
     // view transform
-    auto q_yaw = fpalg::QuaternionAxisAngle({0, 1, 0}, yawRadians);
-    auto q_pitch = fpalg::QuaternionAxisAngle({1, 0, 0}, pitchRadians);
-    auto transform = fpalg::Transform{shift, fpalg::QuaternionMulR(q_pitch, q_yaw)};
+    auto q_yaw = falg::QuaternionAxisAngle({0, 1, 0}, yawRadians);
+    auto q_pitch = falg::QuaternionAxisAngle({1, 0, 0}, pitchRadians);
+    auto transform = falg::Transform{shift, falg::QuaternionMulR(q_pitch, q_yaw)};
     state.view = transform.Matrix();
 
     // inverse view transform
@@ -22,7 +22,7 @@ void OrbitCamera::CalcView(int w, int h, int x, int y)
     auto t = std::tan(state.fovYRadians / 2);
     const float xx = 2 * (float)x / w - 1;
     const float yy = 1 - 2 * (float)y / h;
-    auto dir = fpalg::float3{
+    auto dir = falg::float3{
         t * aspectRatio * xx,
         t * yy,
         -1,
@@ -36,11 +36,11 @@ void OrbitCamera::CalcPerspective()
     switch (perspectiveType)
     {
     case PerspectiveTypes::OpenGL:
-        fpalg::PerspectiveRHGL(state.projection.data(), state.fovYRadians, aspectRatio, zNear, zFar);
+        falg::PerspectiveRHGL(state.projection.data(), state.fovYRadians, aspectRatio, zNear, zFar);
         break;
 
     case PerspectiveTypes::D3D:
-        fpalg::PerspectiveRHDX(state.projection.data(), state.fovYRadians, aspectRatio, zNear, zFar);
+        falg::PerspectiveRHDX(state.projection.data(), state.fovYRadians, aspectRatio, zNear, zFar);
         break;
     }
 }

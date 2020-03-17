@@ -10,6 +10,6 @@ target_include_directories(${TARGET_NAME} PUBLIC
     PRIVATE
     )
 target_link_libraries(${TARGET_NAME} PUBLIC
-    fpalg
+    falg
     window_example
     )
