@@ -51,20 +51,20 @@ inline const T &vector_cast(const std::vector<S> &s)
     return *(const T *)r.begin;
 }
 
-struct f3
+struct xyz
 {
     float x;
     float y;
     float z;
 };
-struct f4
+struct xyzw
 {
     float x;
     float y;
     float z;
     float w;
 };
-struct f16
+struct mat4
 {
     float _11;
     float _12;
@@ -173,8 +173,8 @@ inline float3 Mul3(const float3 &lhs, const float3 &rhs)
 template <typename T>
 inline float Dot(const T &_lhs, const T &_rhs)
 {
-    auto &lhs = size_cast<f3>(_lhs);
-    auto &rhs = size_cast<f3>(_rhs);
+    auto &lhs = size_cast<xyz>(_lhs);
+    auto &rhs = size_cast<xyz>(_rhs);
     return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 }
 
@@ -453,8 +453,8 @@ inline float4 QuaternionMulL(const T &l, T r)
     {
         r = {-r[0], -r[1], -r[2], -r[3]};
     }
-    const auto &lhs = size_cast<f4>(l);
-    const auto &rhs = size_cast<f4>(r);
+    const auto &lhs = size_cast<xyzw>(l);
+    const auto &rhs = size_cast<xyzw>(r);
     return {rhs.x * lhs.w + rhs.w * lhs.x + rhs.y * lhs.z - rhs.z * lhs.y,
             rhs.y * lhs.w + rhs.w * lhs.y + rhs.z * lhs.x - rhs.x * lhs.z,
             rhs.z * lhs.w + rhs.w * lhs.z + rhs.x * lhs.y - rhs.y * lhs.x,
@@ -615,7 +615,7 @@ static_assert(sizeof(TRS) == 40, "TRS");
 template <typename T>
 TRS Decompose(const T &_m)
 {
-    auto &m = size_cast<f16>(_m);
+    auto &m = size_cast<mat4>(_m);
     auto s1 = Length({m._11, m._12, m._13});
     auto s2 = Length({m._21, m._22, m._23});
     auto s3 = Length({m._31, m._32, m._33});
