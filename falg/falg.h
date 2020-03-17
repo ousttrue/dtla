@@ -165,42 +165,71 @@ inline bool Nearly(const T &lhs, const T &rhs)
     return true;
 }
 
-inline float3 Mul3(const float3 &lhs, const float3 &rhs)
+template <typename T>
+inline T EachMul(const T &lhs, const T &rhs)
 {
-    return {lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]};
+    using ARRAY = float_array<T>;
+    auto &l = ARRAY::cast(lhs);
+    auto &r = ARRAY::cast(rhs);
+
+    ARRAY::type value;
+    for (size_t i = 0; i < ARRAY::length; ++i)
+    {
+        value[i] = l[i] * r[i];
+    }
+    return size_cast<T>(value);
 }
 
 template <typename T>
-inline float Dot(const T &_lhs, const T &_rhs)
+inline float Dot(const T &lhs, const T &rhs)
 {
-    auto &lhs = size_cast<xyz>(_lhs);
-    auto &rhs = size_cast<xyz>(_rhs);
-    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+    using ARRAY = float_array<T>;
+    auto &l = ARRAY::cast(lhs);
+    auto &r = ARRAY::cast(rhs);
+
+    float value = 0;
+    for (size_t i = 0; i < ARRAY::length; ++i)
+    {
+        value += l[i] * r[i];
+    }
+    return value;
 }
 
-inline float Length(const float3 &lhs)
+template <typename T>
+inline float Length(const T &src)
 {
-    return std::sqrt(Dot(lhs, lhs));
+    return std::sqrt(Dot(src, src));
 }
 
-inline float3 Normalize(const float3 &lhs)
+template <typename T>
+inline T Normalize(const T &src)
 {
-    auto factor = 1.0f / Length(lhs);
-    return {lhs[0] * factor, lhs[1] * factor, lhs[2] * factor};
+    using ARRAY = float_array<T>;
+    auto value = ARRAY::cast(src);
+    auto factor = 1.0f / Length(src);
+    for (size_t i = 0; i < ARRAY::length; ++i)
+    {
+        value[i] *= factor;
+    }
+    return size_cast<T>(value);
 }
 
-inline float3 Cross(const float3 &lhs, const float3 &rhs)
+template <typename T>
+inline T Cross(const T &lhs, const T &rhs)
 {
-    return {
-        lhs[1] * rhs[2] - lhs[2] * rhs[1],
-        lhs[2] * rhs[0] - lhs[0] * rhs[2],
-        lhs[0] * rhs[1] - lhs[1] * rhs[0]};
+    auto &l = size_cast<xyz>(lhs);
+    auto &r = size_cast<xyz>(rhs);
+
+    xyz value{
+        l.y * r.z - l.z * r.y,
+        l.z * r.x - l.x * r.z,
+        l.x * r.y - l.y * r.x,
+    };
+    return size_cast<T>(value);
 }
 
-inline float Dot4(const std::array<float, 4> &row, const std::array<float, 4> &col)
-{
-    return row[0] * col[0] + row[1] * col[1] + row[2] * col[2] + row[3] * col[3];
-}
+//
+
 inline float Dot4(const float *row, const float *col, int step = 1)
 {
     auto i = 0;
@@ -449,7 +478,7 @@ inline float4 QuaternionMulR(const float4 &lhs, const float4 &rhs)
 template <typename T>
 inline float4 QuaternionMulL(const T &l, T r)
 {
-    if (Dot4(l, r) < 0)
+    if (Dot(l, r) < 0)
     {
         r = {-r[0], -r[1], -r[2], -r[3]};
     }
@@ -616,9 +645,9 @@ template <typename T>
 TRS Decompose(const T &_m)
 {
     auto &m = size_cast<mat4>(_m);
-    auto s1 = Length({m._11, m._12, m._13});
-    auto s2 = Length({m._21, m._22, m._23});
-    auto s3 = Length({m._31, m._32, m._33});
+    auto s1 = Length(float3{m._11, m._12, m._13});
+    auto s2 = Length(float3{m._21, m._22, m._23});
+    auto s3 = Length(float3{m._31, m._32, m._33});
     TRS trs({m._41, m._42, m._43}, MatrixToQuaternion(_m), {s1, s2, s3});
     return trs;
 }

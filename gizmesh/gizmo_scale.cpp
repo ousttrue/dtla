@@ -36,7 +36,7 @@ static bool dragger(const GizmoComponent &component,
         return false;
     }
     auto intersect = worldRay.SetT(t);
-    auto offset_on_axis = falg::Mul3((intersect - state.offset - state.original.translation), component.axis);
+    auto offset_on_axis = falg::EachMul((intersect - state.offset - state.original.translation), component.axis);
     flush_to_zero(offset_on_axis);
     auto new_scale = state.original.scale + falg::size_cast<falg::float3>(offset_on_axis);
 

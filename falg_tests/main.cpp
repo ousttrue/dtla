@@ -3,10 +3,14 @@
 #include <falg.h>
 #include <DirectXMath.h>
 
-TEST_CASE("f3", "[dot]")
+TEST_CASE("T", "[template]")
 {
+    REQUIRE(falg::EachMul(std::array<float, 2>{1, 2}, std::array<float, 2>{1, 2}) == std::array<float, 2>{1, 4});
     REQUIRE(falg::Dot(std::array<float, 3>{1, 2, 3}, std::array<float, 3>{1, 2, 3}) == 14);
     REQUIRE(falg::Dot(DirectX::XMFLOAT3{1, 2, 3}, DirectX::XMFLOAT3{1, 2, 3}) == 14);
+    REQUIRE(falg::Dot(std::array<float, 4>{1, 2, 3, 4}, std::array<float, 4>{1, 2, 3, 4}) == 30);
+    REQUIRE(falg::Length(std::array<float, 3>{0, 0, 2}) == 2);
+    REQUIRE(falg::Length(std::array<float, 4>{0, 3, 4, 0}) == 5);
 }
 
 TEST_CASE("f16", "[decomposition]")
