@@ -565,7 +565,7 @@ inline std::array<float, 16> ScaleMatrix(float x, float y, float z)
     return ScaleMatrix({x, y, z});
 }
 
-inline float3 QuaternionRotateFloat3(const float4 &q, const float3 &v)
+inline float3 QuaternionRotateFloat3R(const float4 &q, const float3 &v)
 {
     auto x = QuaternionXDir(q);
     auto y = QuaternionYDir(q);
@@ -581,7 +581,7 @@ struct Transform
     Transform operator*(const Transform &rhs) const
     {
         return {
-            QuaternionRotateFloat3(rhs.rotation, translation) + rhs.translation,
+            QuaternionRotateFloat3R(rhs.rotation, translation) + rhs.translation,
             QuaternionMulL(rotation, rhs.rotation)};
     }
 
@@ -597,18 +597,18 @@ struct Transform
     Transform Inverse() const
     {
         auto inv_r = QuaternionConjugate(rotation);
-        auto inv_t = QuaternionRotateFloat3(inv_r, -translation);
+        auto inv_t = QuaternionRotateFloat3R(inv_r, -translation);
         return {inv_t, inv_r};
     }
 
     float3 ApplyPosition(const float3 &v) const
     {
-        return QuaternionRotateFloat3(rotation, v) + translation;
+        return QuaternionRotateFloat3R(rotation, v) + translation;
     }
 
     float3 ApplyDirection(const float3 &v) const
     {
-        return QuaternionRotateFloat3(rotation, v);
+        return QuaternionRotateFloat3R(rotation, v);
     }
 };
 
@@ -676,7 +676,7 @@ struct Ray
         auto toLocal = t.Inverse();
         return {
             toLocal.ApplyPosition(origin),
-            falg::QuaternionRotateFloat3(toLocal.rotation, direction)};
+            falg::QuaternionRotateFloat3R(toLocal.rotation, direction)};
     }
 
     float3 SetT(float t) const

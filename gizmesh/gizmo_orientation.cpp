@@ -150,7 +150,7 @@ namespace handle
 {
 
 bool rotation(const GizmoSystem &ctx, uint32_t id, bool is_local,
-              const falg::float3 &t, falg::float4 &r)
+              const falg::Transform *parent, const falg::float3 &t, falg::float4 &r)
 {
     auto &impl = ctx.m_impl;
     auto [gizmo, created] = impl->get_or_create_gizmo(id);

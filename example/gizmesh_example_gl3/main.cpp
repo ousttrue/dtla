@@ -138,16 +138,16 @@ int main(int argc, char *argv[])
             {
             case transform_mode::translate:
                 gizmesh::handle::translation(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), is_local,
-                                             teapot_a.translation, teapot_a.rotation);
+                                             nullptr, teapot_a.translation, teapot_a.rotation);
                 gizmesh::handle::translation(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), is_local,
-                                             teapot_b.translation, teapot_b.rotation);
+                                             nullptr, teapot_b.translation, teapot_b.rotation);
                 break;
 
             case transform_mode::rotate:
                 gizmesh::handle::rotation(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), is_local,
-                                          teapot_a.translation, teapot_a.rotation);
+                                          nullptr, teapot_a.translation, teapot_a.rotation);
                 gizmesh::handle::rotation(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), is_local,
-                                          teapot_b.translation, teapot_b.rotation);
+                                          nullptr, teapot_b.translation, teapot_b.rotation);
                 break;
 
             case transform_mode::scale:

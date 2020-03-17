@@ -126,14 +126,23 @@ static void draw(Gizmo &gizmo, gizmo_system_impl *impl, const falg::Transform &t
 namespace handle
 {
 bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
-                 falg::float3 &t, const falg::float4 &r)
+                 const falg::Transform *parent, falg::float3 &t, const falg::float4 &r)
 {
     auto &impl = ctx.m_impl;
     auto [gizmo, created] = impl->get_or_create_gizmo(id);
 
     // raycast
     auto worldRay = falg::Ray{impl->state.ray_origin, impl->state.ray_direction};
-    auto gizmoTransform = falg::Transform{t, is_local ? r : falg::float4{0, 0, 0, 1}};
+    auto gizmoTransform = falg::Transform{t, r};
+    // auto gizmoTransform = falg::Transform{t, is_local ? r : falg::float4{0, 0, 0, 1}};
+    if (parent)
+    {
+        gizmoTransform = *parent * gizmoTransform;
+    }
+    if (is_local)
+    {
+        gizmoTransform.rotation = {0, 0, 0, 1};
+    }   
     auto localRay = worldRay.Transform(gizmoTransform.Inverse());
     auto [mesh, best_t] = raycast(localRay);
     gizmo->hover(mesh != nullptr);
