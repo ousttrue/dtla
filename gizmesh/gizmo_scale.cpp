@@ -19,8 +19,8 @@ template <typename T>
 T clamp(const T &val, const T &min, const T &max) { return std::min(std::max(val, min), max); }
 
 static bool dragger(const GizmoComponent &component,
-                    const falg::Ray &worldRay, const GizmoState &state,
-                    falg::TRS *out, bool uniform)
+                    const falg::Ray &worldRay, const GizmoState &state, bool uniform,
+                    falg::float3 *out)
 {
     auto plane_tangent = falg::Cross(
         component.axis,
@@ -43,11 +43,11 @@ static bool dragger(const GizmoComponent &component,
     if (uniform)
     {
         auto s = clamp(falg::Dot(intersect, new_scale), 0.01f, 1000.f);
-        out->scale = falg::float3{s, s, s};
+        *out = falg::float3{s, s, s};
     }
     else
     {
-        out->scale = falg::float3{
+        *out = falg::float3{
             clamp(new_scale[0], 0.01f, 1000.f),
             clamp(new_scale[1], 0.01f, 1000.f),
             clamp(new_scale[2], 0.01f, 1000.f)};
@@ -113,13 +113,14 @@ static void draw(const falg::Transform &t, std::vector<gizmo_renderable> &drawli
 namespace handle
 {
 
-bool scale(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_uniform)
+bool scale(const GizmoSystem &ctx, uint32_t id, bool is_uniform,
+           const falg::float3 &t, const falg::float4 &r, falg::float3 &s)
 {
     auto &impl = ctx.m_impl;
     auto [gizmo, created] = impl->get_or_create_gizmo(id);
 
     auto worldRay = falg::Ray{impl->state.ray_origin, impl->state.ray_direction};
-    auto localRay = worldRay.Transform(trs.transform.Inverse());
+    auto localRay = worldRay.Transform(falg::Transform{t, r}.Inverse());
 
     if (impl->state.has_clicked)
     {
@@ -128,8 +129,8 @@ bool scale(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_uniform)
         if (updated_state)
         {
             auto localHit = localRay.SetT(best_t);
-            auto offset = trs.transform.ApplyPosition(localHit) - trs.transform.translation;
-            gizmo->begin(updated_state, offset, trs, {});
+            auto offset = falg::Transform{t, r}.ApplyPosition(localHit) - t;
+            gizmo->begin(updated_state, offset, {t, r, s}, {});
         }
     }
     else if (impl->state.has_released)
@@ -140,13 +141,12 @@ bool scale(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_uniform)
     auto active = gizmo->active();
     if (active)
     {
-        if (dragger(*active, localRay, gizmo->m_state,
-                    &trs, is_uniform))
+        if (dragger(*active, localRay, gizmo->m_state, is_uniform, &s))
         {
         }
     }
 
-    draw(trs.transform, impl->drawlist, active);
+    draw({t, r}, impl->drawlist, active);
 
     return gizmo->isHoverOrActive();
 }

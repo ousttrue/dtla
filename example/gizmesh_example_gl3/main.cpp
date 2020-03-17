@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         }
         lastState = state.KeyCode;
 
-       auto viewProjection = camera.state.view * camera.state.projection;
+        auto viewProjection = camera.state.view * camera.state.projection;
 
         //
         // draw
@@ -137,18 +137,24 @@ int main(int argc, char *argv[])
             switch (mode)
             {
             case transform_mode::translate:
-                gizmesh::handle::translation(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), teapot_a, is_local);
-                gizmesh::handle::translation(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), teapot_b, is_local);
+                gizmesh::handle::translation(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), is_local,
+                                             teapot_a.translation, teapot_a.rotation);
+                gizmesh::handle::translation(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), is_local,
+                                             teapot_b.translation, teapot_b.rotation);
                 break;
 
             case transform_mode::rotate:
-                gizmesh::handle::rotation(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), teapot_a, is_local);
-                gizmesh::handle::rotation(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), teapot_b, is_local);
+                gizmesh::handle::rotation(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), is_local,
+                                          teapot_a.translation, teapot_a.rotation);
+                gizmesh::handle::rotation(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), is_local,
+                                          teapot_b.translation, teapot_b.rotation);
                 break;
 
             case transform_mode::scale:
-                gizmesh::handle::scale(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), teapot_a, is_local);
-                gizmesh::handle::scale(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), teapot_b, is_local);
+                gizmesh::handle::scale(gizmo_system, gizmesh::hash_fnv1a("first-example-gizmo"), is_local,
+                                       teapot_a.translation, teapot_a.rotation, teapot_a.scale);
+                gizmesh::handle::scale(gizmo_system, gizmesh::hash_fnv1a("second-example-gizmo"), is_local,
+                                       teapot_b.translation, teapot_b.rotation, teapot_b.scale);
                 break;
             }
 

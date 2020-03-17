@@ -42,8 +42,11 @@ uint32_t hash_fnv1a(const std::string &str);
 namespace gizmesh::handle
 {
 
-bool translation(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_local);
-bool rotation(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_local);
-bool scale(const GizmoSystem &system, uint32_t id, falg::TRS &t, bool is_uniform);
+bool translation(const GizmoSystem &system, uint32_t id, bool is_local,
+                 falg::float3 &t, const falg::float4 &r);
+bool rotation(const GizmoSystem &system, uint32_t id, bool is_local,
+              const falg::float3 &t, falg::float4 &r);
+bool scale(const GizmoSystem &system, uint32_t id, bool is_uniform,
+           const falg::float3 &t, const falg::float4 &r, falg::float3 &s);
 
 } // namespace gizmesh::handle

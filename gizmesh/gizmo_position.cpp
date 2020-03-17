@@ -5,7 +5,7 @@ namespace gizmesh
 {
 
 static bool planeDragger(const GizmoComponent &component, const falg::Ray &worldRay, const GizmoState &state,
-                         falg::Transform *out, const falg::float3 &N)
+                         falg::float3 *translation, const falg::float3 &N)
 {
 
     falg::Plane plane(N, state.original.translation + state.offset);
@@ -16,24 +16,24 @@ static bool planeDragger(const GizmoComponent &component, const falg::Ray &world
     }
 
     auto intersect = worldRay.SetT(t);
-    out->translation = intersect - state.offset;
+    *translation = intersect - state.offset;
 
     return true;
 }
 
 static bool axisDragger(const GizmoComponent &component, const falg::Ray &worldRay, const GizmoState &state,
-                        falg::Transform *out, const falg::float3 &axis)
+                        falg::float3 *translation, const falg::float3 &axis)
 {
     // First apply a plane translation dragger with a plane that contains the desired axis and is oriented to face the camera
-    auto plane_tangent = falg::Cross(axis, out->translation - worldRay.origin);
+    auto plane_tangent = falg::Cross(axis, *translation - worldRay.origin);
     auto plane_normal = falg::Cross(axis, plane_tangent);
-    if (!planeDragger(component, worldRay, state, out, plane_normal))
+    if (!planeDragger(component, worldRay, state, translation, plane_normal))
     {
         return false;
     }
 
     // Constrain object motion to be along the desired axis
-    out->translation = state.original.translation + axis * falg::Dot(out->translation - state.original.translation, axis);
+    *translation = state.original.translation + axis * falg::Dot(*translation - state.original.translation, axis);
     return true;
 }
 
@@ -125,14 +125,15 @@ static void draw(Gizmo &gizmo, gizmo_system_impl *impl, const falg::Transform &t
 
 namespace handle
 {
-bool translation(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_local)
+bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
+                 falg::float3 &t, const falg::float4 &r)
 {
     auto &impl = ctx.m_impl;
     auto [gizmo, created] = impl->get_or_create_gizmo(id);
 
     // raycast
     auto worldRay = falg::Ray{impl->state.ray_origin, impl->state.ray_direction};
-    auto gizmoTransform = is_local ? trs.transform : falg::Transform{trs.transform.translation, {0, 0, 0, 1}};
+    auto gizmoTransform = falg::Transform{t, is_local ? r : falg::float4{0, 0, 0, 1}};
     auto localRay = worldRay.Transform(gizmoTransform.Inverse());
     auto [mesh, best_t] = raycast(localRay);
     gizmo->hover(mesh != nullptr);
@@ -143,7 +144,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_lo
         if (mesh)
         {
             auto localHit = localRay.SetT(best_t);
-            auto worldOffset = gizmoTransform.ApplyPosition(localHit) - trs.transform.translation;
+            auto worldOffset = gizmoTransform.ApplyPosition(localHit) - t;
             falg::float3 axis;
             if (mesh == &componentXYZ)
             {
@@ -160,7 +161,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_lo
                     axis = mesh->axis;
                 }
             }
-            gizmo->begin(mesh, worldOffset, trs, axis);
+            gizmo->begin(mesh, worldOffset, {t, r, {1, 1, 1}}, axis);
         }
     }
     else if (impl->state.has_released)
@@ -175,11 +176,11 @@ bool translation(const GizmoSystem &ctx, uint32_t id, falg::TRS &trs, bool is_lo
         {
             if (active == &componentX || active == &componentY || active == &componentZ)
             {
-                axisDragger(*active, worldRay, gizmo->m_state, &trs.transform, gizmo->m_state.axis);
+                axisDragger(*active, worldRay, gizmo->m_state, &t, gizmo->m_state.axis);
             }
             else
             {
-                planeDragger(*active, worldRay, gizmo->m_state, &trs.transform, gizmo->m_state.axis);
+                planeDragger(*active, worldRay, gizmo->m_state, &t, gizmo->m_state.axis);
             }
         }
     }
