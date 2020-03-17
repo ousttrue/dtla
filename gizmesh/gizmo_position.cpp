@@ -137,12 +137,13 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
     // auto gizmoTransform = falg::Transform{t, is_local ? r : falg::float4{0, 0, 0, 1}};
     if (parent)
     {
+        // local to world
         gizmoTransform = gizmoTransform * *parent;
     }
-    if (is_local)
+    if (!is_local)
     {
         gizmoTransform.rotation = {0, 0, 0, 1};
-    }   
+    }
     auto localRay = worldRay.Transform(gizmoTransform.Inverse());
     auto [mesh, best_t] = raycast(localRay);
     gizmo->hover(mesh != nullptr);
@@ -153,7 +154,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
         if (mesh)
         {
             auto localHit = localRay.SetT(best_t);
-            auto worldOffset = gizmoTransform.ApplyPosition(localHit) - t;
+            auto worldOffset = gizmoTransform.ApplyPosition(localHit) - gizmoTransform.translation;
             falg::float3 axis;
             if (mesh == &componentXYZ)
             {
@@ -170,7 +171,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
                     axis = mesh->axis;
                 }
             }
-            gizmo->begin(mesh, worldOffset, {t, r, {1, 1, 1}}, axis);
+            gizmo->begin(mesh, worldOffset, {gizmoTransform.translation, gizmoTransform.rotation, {1, 1, 1}}, axis);
         }
     }
     else if (impl->state.has_released)
@@ -185,11 +186,20 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
         {
             if (active == &componentX || active == &componentY || active == &componentZ)
             {
-                axisDragger(*active, worldRay, gizmo->m_state, &t, gizmo->m_state.axis);
+                axisDragger(*active, worldRay, gizmo->m_state, &gizmoTransform.translation, gizmo->m_state.axis);
             }
             else
             {
-                planeDragger(*active, worldRay, gizmo->m_state, &t, gizmo->m_state.axis);
+                planeDragger(*active, worldRay, gizmo->m_state, &gizmoTransform.translation, gizmo->m_state.axis);
+            }
+            if (parent)
+            {
+                // world to local
+                t = (gizmoTransform * parent->Inverse()).translation;
+            }
+            else
+            {
+                t = gizmoTransform.translation;
             }
         }
     }
