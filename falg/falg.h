@@ -7,9 +7,41 @@
 
 ///
 /// float algebra
+/// 
+/// TODO: use ROW vector & ROW major matrix
 ///
-/// multiply order
-///   root * parent * local * col vector => vector
+/// [COL vector] => x
+/// R|T   X   X'
+/// -+- * Y = Y'
+/// 0|1   Z   Z'
+/// #multiply order
+/// root * parent * local * col vector => vector
+///
+/// [ROW vector]
+///       R|0
+/// XYZ * -+- = X'Y'Z'
+///       T|1
+/// #multiply order
+/// row vector * local * parent * root => vector
+///
+/// [ROW major]
+/// matrix { m11, m12, m13, ... }    
+/// 
+/// [COL major] => x
+/// matrix { m11, m21, m31, ... }
+///
+/// tradeoff
+/// => get translation from matrix
+/// => matrix apply vector function
+/// => matrix conversion function(ex. quaterion to matrix, decompose... etc)
+///
+/// upload [ROW vector][ROW major] matrix to d3d constant buffer
+/// mul(matrix, float4) [ROW vector usage]
+/// OK
+///
+/// if
+/// mul(float4, world) [COL vector usage]
+/// world is inversed
 ///
 namespace falg
 {
