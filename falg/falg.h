@@ -7,7 +7,7 @@
 
 ///
 /// float algebra
-/// 
+///
 /// TODO: use ROW vector & ROW major matrix
 ///
 /// [COL vector] => x
@@ -25,8 +25,8 @@
 /// row vector * local * parent * root => vector
 ///
 /// [ROW major]
-/// matrix { m11, m12, m13, ... }    
-/// 
+/// matrix { m11, m12, m13, ... }
+///
 /// [COL major] => x
 /// matrix { m11, m21, m31, ... }
 ///
@@ -122,47 +122,6 @@ struct mat4
     float _44;
 };
 
-} // namespace falg
-
-/////////////////////////////////////////////////////////////////////////////
-// std
-/////////////////////////////////////////////////////////////////////////////
-namespace std
-{
-
-// for std::array
-inline falg::float3 operator-(const falg::float3 &lhs)
-{
-    return {-lhs[0], -lhs[1], -lhs[2]};
-}
-inline falg::float3 operator+(const falg::float3 &lhs, const falg::float3 &rhs)
-{
-    return {lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2]};
-}
-inline falg::float3 &operator+=(falg::float3 &lhs, const falg::float3 &rhs)
-{
-    lhs[0] += rhs[0];
-    lhs[1] += rhs[1];
-    lhs[2] += rhs[2];
-    return lhs;
-}
-inline falg::float3 operator-(const falg::float3 &lhs, const falg::float3 &rhs)
-{
-    return {lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2]};
-}
-inline falg::float3 operator*(const falg::float3 &lhs, float scalar)
-{
-    return {lhs[0] * scalar, lhs[1] * scalar, lhs[2] * scalar};
-}
-
-} // namespace std
-
-/////////////////////////////////////////////////////////////////////////////
-// falg
-/////////////////////////////////////////////////////////////////////////////
-namespace falg
-{
-
 template <size_t MOD, size_t N>
 struct mul4
 {
@@ -201,6 +160,48 @@ inline bool Nearly(const T &lhs, const T &rhs)
         }
     }
     return true;
+}
+
+template <typename T>
+inline T MulScalar(const T &value, float f)
+{
+    using ARRAY = float_array<T>;
+    auto v = ARRAY::cast(value);
+    for (size_t i = 0; i < ARRAY::length; ++i)
+    {
+        v[i] *= f;
+    }
+    return size_cast<T>(v);
+}
+
+template <typename T>
+inline T Add(const T &lhs, const T &rhs)
+{
+    using ARRAY = float_array<T>;
+    auto &l = ARRAY::cast(lhs);
+    auto &r = ARRAY::cast(rhs);
+
+    ARRAY::type value;
+    for (size_t i = 0; i < ARRAY::length; ++i)
+    {
+        value[i] = l[i] + r[i];
+    }
+    return size_cast<T>(value);
+}
+
+template <typename T>
+inline T Sub(const T &lhs, const T &rhs)
+{
+    using ARRAY = float_array<T>;
+    auto &l = ARRAY::cast(lhs);
+    auto &r = ARRAY::cast(rhs);
+
+    ARRAY::type value;
+    for (size_t i = 0; i < ARRAY::length; ++i)
+    {
+        value[i] = l[i] - r[i];
+    }
+    return size_cast<T>(value);
 }
 
 template <typename T>
@@ -608,7 +609,7 @@ inline float3 QuaternionRotateFloat3(const float4 &q, const float3 &v)
     auto x = QuaternionXDir(q);
     auto y = QuaternionYDir(q);
     auto z = QuaternionZDir(q);
-    return x * v[0] + y * v[1] + z * v[2];
+    return Add(MulScalar(x, v[0]), Add(MulScalar(y, v[1]), MulScalar(z, v[2])));
 }
 
 struct Transform
@@ -619,11 +620,11 @@ struct Transform
     Transform operator*(const Transform &rhs) const
     {
         return {
-            QuaternionRotateFloat3(rhs.rotation, translation) + rhs.translation,
+            Add(QuaternionRotateFloat3(rhs.rotation, translation), rhs.translation),
             QuaternionMul(rotation, rhs.rotation)};
     }
 
-    std::array<float, 16> Matrix() const
+    std::array<float, 16> RowMatrix() const
     {
         auto r = QuaternionMatrix(rotation);
         r[12] = translation[0];
@@ -635,13 +636,13 @@ struct Transform
     Transform Inverse() const
     {
         auto inv_r = QuaternionConjugate(rotation);
-        auto inv_t = QuaternionRotateFloat3(inv_r, -translation);
+        auto inv_t = QuaternionRotateFloat3(inv_r, MulScalar(translation, -1));
         return {inv_t, inv_r};
     }
 
     float3 ApplyPosition(const float3 &v) const
     {
-        return QuaternionRotateFloat3(rotation, v) + translation;
+        return Add(QuaternionRotateFloat3(rotation, v), translation);
     }
 
     float3 ApplyDirection(const float3 &v) const
@@ -672,9 +673,9 @@ struct TRS
     {
     }
 
-    std::array<float, 16> Matrix() const
+    std::array<float, 16> RowMatrix() const
     {
-        return ScaleMatrix(scale) * transform.Matrix();
+        return ScaleMatrix(scale) * transform.RowMatrix();
     }
 };
 static_assert(sizeof(TRS) == 40, "TRS");
@@ -719,7 +720,7 @@ struct Ray
 
     float3 SetT(float t) const
     {
-        return origin + direction * t;
+        return Add(origin, MulScalar(direction, t));
     }
 
     Ray Transform(const falg::Transform &t) const
@@ -751,7 +752,7 @@ inline float operator>>(const Ray &ray, const Plane &plane)
         return -std::numeric_limits<float>::infinity();
     }
 
-    auto Q = plane.pointOnPlane - ray.origin;
+    auto Q = Sub(plane.pointOnPlane, ray.origin);
     auto NQ = Dot(plane.normal, Q);
     return NQ / NV;
 }
@@ -766,15 +767,15 @@ struct Triangle
 // float intersect_ray_triangle(const ray &ray, const minalg::float3 &v0, const minalg::float3 &v1, const minalg::float3 &v2)
 inline float operator>>(const Ray &ray, const Triangle &triangle)
 {
-    auto e1 = triangle.v1 - triangle.v0;
-    auto e2 = triangle.v2 - triangle.v0;
+    auto e1 = Sub(triangle.v1, triangle.v0);
+    auto e2 = Sub(triangle.v2, triangle.v0);
     auto h = Cross(ray.direction, e2);
     auto a = Dot(e1, h);
     if (std::abs(a) == 0)
         return std::numeric_limits<float>::infinity();
 
     float f = 1 / a;
-    auto s = ray.origin - triangle.v0;
+    auto s = Sub(ray.origin, triangle.v0);
     auto u = f * Dot(s, h);
     if (u < 0 || u > 1)
         return std::numeric_limits<float>::infinity();
@@ -880,3 +881,36 @@ std::array<float, 4> MatrixToQuaternionR(const T &m)
 // }
 
 } // namespace falg
+
+/////////////////////////////////////////////////////////////////////////////
+// std
+/////////////////////////////////////////////////////////////////////////////
+namespace std
+{
+
+// for std::array
+inline falg::float3 operator-(const falg::float3 &lhs)
+{
+    return {-lhs[0], -lhs[1], -lhs[2]};
+}
+inline falg::float3 operator+(const falg::float3 &lhs, const falg::float3 &rhs)
+{
+    return {lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2]};
+}
+inline falg::float3 &operator+=(falg::float3 &lhs, const falg::float3 &rhs)
+{
+    lhs[0] += rhs[0];
+    lhs[1] += rhs[1];
+    lhs[2] += rhs[2];
+    return lhs;
+}
+inline falg::float3 operator-(const falg::float3 &lhs, const falg::float3 &rhs)
+{
+    return {lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2]};
+}
+inline falg::float3 operator*(const falg::float3 &lhs, float scalar)
+{
+    return {lhs[0] * scalar, lhs[1] * scalar, lhs[2] * scalar};
+}
+
+} // namespace std

@@ -127,8 +127,8 @@ int main(int argc, char *argv[])
         // draw
         //
         auto context = renderer.beginFrame(state.Width, state.Height);
-        teapot_mesh->draw(context, teapot_a.Matrix().data(), viewProjection.data(), camera.state.position.data());
-        teapot_mesh->draw(context, teapot_b.Matrix().data(), viewProjection.data(), camera.state.position.data());
+        teapot_mesh->draw(context, teapot_a.RowMatrix().data(), viewProjection.data(), camera.state.position.data());
+        teapot_mesh->draw(context, teapot_b.RowMatrix().data(), viewProjection.data(), camera.state.position.data());
 
         {
             //
