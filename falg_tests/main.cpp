@@ -17,7 +17,7 @@ TEST_CASE("f16", "[decomposition]")
 {
     {
         auto t = falg::TranslationMatrix(1, 2, 3);
-        auto trs = falg::Decompose(t);
+        auto trs = falg::RowMatrixDecompose(t);
         REQUIRE(trs.translation == std::array<float, 3>{1, 2, 3});
         REQUIRE(trs.rotation == std::array<float, 4>{0, 0, 0, 1});
         REQUIRE(falg::Nearly(trs.rotation, std::array<float, 4>{0, 0, 0, 1}));
@@ -26,7 +26,7 @@ TEST_CASE("f16", "[decomposition]")
     {
         auto r = falg::QuaternionMatrix(falg::QuaternionAxisAngle({1, 0, 0}, 1));
         auto t = falg::TranslationMatrix(1, 2, 3);
-        auto trs = falg::Decompose(r * t);
+        auto trs = falg::RowMatrixDecompose(r * t);
         REQUIRE(trs.translation == std::array<float, 3>{1, 2, 3});
         REQUIRE(trs.rotation == falg::QuaternionAxisAngle({1, 0, 0}, 1));
     }
@@ -35,7 +35,7 @@ TEST_CASE("f16", "[decomposition]")
         auto r = falg::QuaternionMatrix(falg::QuaternionAxisAngle({1, 0, 0}, 1));
         auto t = falg::TranslationMatrix(1, 2, 3);
         auto s = falg::ScaleMatrix(1, 2, 3);
-        auto trs = falg::Decompose(s * r * t);
+        auto trs = falg::RowMatrixDecompose(s * r * t);
         REQUIRE(trs.translation == std::array<float, 3>{1, 2, 3});
         REQUIRE(trs.rotation == falg::QuaternionAxisAngle({1, 0, 0}, 1));
         REQUIRE(trs.scale == std::array<float, 3>{1, 2, 3});

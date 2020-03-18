@@ -36,8 +36,7 @@ static bool dragger(const GizmoComponent &component,
     auto a = falg::Normalize(falg::Cross(arm1, arm2));
     out->rotation = falg::QuaternionMul(
         start_orientation,
-        falg::QuaternionAxisAngle(a, angle)
-        );
+        falg::QuaternionAxisAngle(a, angle));
     return true;
 }
 
@@ -158,7 +157,16 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, bool is_local,
 
     // assert(length2(t.orientation) > float(1e-6));
     auto worldRay = falg::Ray{impl->state.ray_origin, impl->state.ray_direction};
-    falg::Transform gizmoTransform = falg::Transform{t, is_local ? r : falg::float4{0, 0, 0, 1}}; // Orientation is local by default
+    auto gizmoTransform = falg::Transform{t, r}; // Orientation is local by default
+    if (parent)
+    {
+        gizmoTransform = gizmoTransform * *parent;
+    }
+    auto world = gizmoTransform;
+    if (!is_local)
+    {
+        gizmoTransform.rotation = {0, 0, 0, 1};
+    }
 
     // raycast
     {
@@ -171,8 +179,8 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, bool is_local,
             if (mesh)
             {
                 auto localHit = localRay.SetT(best_t);
-                auto offset = gizmoTransform.ApplyPosition(localHit) - t;
-                gizmo->begin(mesh, offset, {t, r, {1, 1, 1}}, {});
+                auto worldOffset = gizmoTransform.ApplyPosition(localHit) - world.translation;
+                gizmo->begin(mesh, worldOffset, {world.translation, world.rotation, {1, 1, 1}}, {});
             }
         }
         else if (impl->state.has_released)
@@ -195,6 +203,10 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, bool is_local,
         else
         {
             r = gizmoTransform.rotation;
+        }
+        if (parent)
+        {
+            r = falg::QuaternionMul(r, falg::QuaternionConjugate(parent->rotation));
         }
     }
 

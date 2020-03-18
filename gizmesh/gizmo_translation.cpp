@@ -171,7 +171,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
                     axis = mesh->axis;
                 }
             }
-            gizmo->begin(mesh, worldOffset, {gizmoTransform.translation, gizmoTransform.rotation, {1, 1, 1}}, axis);
+            gizmo->begin(mesh, worldOffset, {gizmoTransform.translation, {0, 0, 0, 1}, {1, 1, 1}}, axis);
         }
     }
     else if (impl->state.has_released)
