@@ -138,7 +138,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
     if (parent)
     {
         // local to world
-        gizmoTransform = *parent * gizmoTransform;
+        gizmoTransform = gizmoTransform * *parent;
     }
     if (!is_local)
     {
@@ -195,7 +195,7 @@ bool translation(const GizmoSystem &ctx, uint32_t id, bool is_local,
             if (parent)
             {
                 // world to local
-                t = (parent->Inverse() * gizmoTransform).translation;
+                t = (gizmoTransform * parent->Inverse()).translation;
             }
             else
             {

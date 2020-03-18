@@ -681,13 +681,13 @@ struct TRS
 static_assert(sizeof(TRS) == 40, "TRS");
 
 template <typename T>
-TRS Decompose(const T &_m)
+TRS RowMatrixDecompose(const T &_m)
 {
     auto &m = size_cast<mat4>(_m);
     auto s1 = Length(float3{m._11, m._12, m._13});
     auto s2 = Length(float3{m._21, m._22, m._23});
     auto s3 = Length(float3{m._31, m._32, m._33});
-    TRS trs({m._41, m._42, m._43}, MatrixToQuaternionR(_m), {s1, s2, s3});
+    TRS trs({m._41, m._42, m._43}, RowMatrixToQuaternion(_m), {s1, s2, s3});
     return trs;
 }
 
@@ -826,7 +826,7 @@ std::array<float, 3> MatrixToTranslation(const T &m)
     return MatrixToTranslation(size_cast<m16>(m));
 }
 
-inline std::array<float, 4> MatrixToQuaternionR(const m16 &m)
+inline std::array<float, 4> ColMatrixToQuaternion(const m16 &m)
 {
     float x, y, z, w;
     float trace = m._11 + m._22 + m._33; // I removed + 1.0f; see discussion with Ethan
@@ -869,16 +869,16 @@ inline std::array<float, 4> MatrixToQuaternionR(const m16 &m)
 }
 
 template <typename T>
-std::array<float, 4> MatrixToQuaternionR(const T &m)
+std::array<float, 4> ColMatrixToQuaternion(const T &m)
 {
-    return MatrixToQuaternionR(size_cast<m16>(m));
+    return ColMatrixToQuaternion(size_cast<m16>(m));
 }
 
-// template <typename T>
-// std::array<float, 4> MatrixToQuaternionL(const T &m)
-// {
-//     return QuaternionConjugate(MatrixToQuaternionR(size_cast<m16>(m)));
-// }
+template <typename T>
+std::array<float, 4> RowMatrixToQuaternion(const T &m)
+{
+    return QuaternionConjugate(ColMatrixToQuaternion(size_cast<m16>(m)));
+}
 
 } // namespace falg
 
