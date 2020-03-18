@@ -283,7 +283,7 @@ inline float Dot4(const float *row, const float *col, int step = 1)
     return value;
 }
 
-inline std::array<float, 16> Mul(const float l[16], const float r[16])
+inline std::array<float, 16> RowMatrixMul(const std::array<float, 16> &l, const std::array<float, 16> &r)
 {
     auto _11 = Dot4(&l[0], &r[0], 4);
     auto _12 = Dot4(&l[0], &r[1], 4);
@@ -327,7 +327,7 @@ namespace std
 {
 inline falg::float16 operator*(const falg::float16 &lhs, const falg::float16 &rhs)
 {
-    return falg::Mul(lhs.data(), rhs.data());
+    return falg::RowMatrixMul(lhs, rhs);
 }
 } // namespace std
 
