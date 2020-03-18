@@ -5,6 +5,12 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+///
+/// float algebra
+///
+/// multiply order
+///   root * parent * local * col vector => vector
+///
 namespace falg
 {
 using float2 = std::array<float, 2>;
@@ -468,15 +474,15 @@ inline float4 QuaternionAxisAngle(const float3 &axis, float angle)
     return {axis[0] * sin, axis[1] * sin, axis[2] * sin, cos};
 }
 
-inline float4 QuaternionMulR(const float4 &lhs, const float4 &rhs)
-{
-    return {lhs[0] * rhs[3] + lhs[3] * rhs[0] + lhs[1] * rhs[2] - lhs[2] * rhs[1],
-            lhs[1] * rhs[3] + lhs[3] * rhs[1] + lhs[2] * rhs[0] - lhs[0] * rhs[2],
-            lhs[2] * rhs[3] + lhs[3] * rhs[2] + lhs[0] * rhs[1] - lhs[1] * rhs[0],
-            lhs[3] * rhs[3] - lhs[0] * rhs[0] - lhs[1] * rhs[1] - lhs[2] * rhs[2]};
-}
+// inline float4 QuaternionMul(const float4 &lhs, const float4 &rhs)
+// {
+//     return {lhs[0] * rhs[3] + lhs[3] * rhs[0] + lhs[1] * rhs[2] - lhs[2] * rhs[1],
+//             lhs[1] * rhs[3] + lhs[3] * rhs[1] + lhs[2] * rhs[0] - lhs[0] * rhs[2],
+//             lhs[2] * rhs[3] + lhs[3] * rhs[2] + lhs[0] * rhs[1] - lhs[1] * rhs[0],
+//             lhs[3] * rhs[3] - lhs[0] * rhs[0] - lhs[1] * rhs[1] - lhs[2] * rhs[2]};
+// }
 template <typename T>
-inline float4 QuaternionMulL(const T &l, T r)
+inline float4 QuaternionMul(const T &l, T r)
 {
     if (Dot(l, r) < 0)
     {
@@ -582,7 +588,7 @@ struct Transform
     {
         return {
             QuaternionRotateFloat3(rhs.rotation, translation) + rhs.translation,
-            QuaternionMulL(rotation, rhs.rotation)};
+            QuaternionMul(rotation, rhs.rotation)};
     }
 
     std::array<float, 16> Matrix() const
@@ -648,7 +654,7 @@ TRS Decompose(const T &_m)
     auto s1 = Length(float3{m._11, m._12, m._13});
     auto s2 = Length(float3{m._21, m._22, m._23});
     auto s3 = Length(float3{m._31, m._32, m._33});
-    TRS trs({m._41, m._42, m._43}, MatrixToQuaternionL(_m), {s1, s2, s3});
+    TRS trs({m._41, m._42, m._43}, MatrixToQuaternionR(_m), {s1, s2, s3});
     return trs;
 }
 
@@ -835,10 +841,10 @@ std::array<float, 4> MatrixToQuaternionR(const T &m)
     return MatrixToQuaternionR(size_cast<m16>(m));
 }
 
-template <typename T>
-std::array<float, 4> MatrixToQuaternionL(const T &m)
-{
-    return QuaternionConjugate(MatrixToQuaternionR(size_cast<m16>(m)));
-}
+// template <typename T>
+// std::array<float, 4> MatrixToQuaternionL(const T &m)
+// {
+//     return QuaternionConjugate(MatrixToQuaternionR(size_cast<m16>(m)));
+// }
 
 } // namespace falg

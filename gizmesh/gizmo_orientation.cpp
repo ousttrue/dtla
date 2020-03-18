@@ -34,9 +34,10 @@ static bool dragger(const GizmoComponent &component,
     }
 
     auto a = falg::Normalize(falg::Cross(arm1, arm2));
-    out->rotation = falg::QuaternionMulR(
-        falg::QuaternionAxisAngle(a, angle),
-        start_orientation);
+    out->rotation = falg::QuaternionMul(
+        start_orientation,
+        falg::QuaternionAxisAngle(a, angle)
+        );
     return true;
 }
 
@@ -187,7 +188,9 @@ bool rotation(const GizmoSystem &ctx, uint32_t id, bool is_local,
         dragger(*active, worldRay, gizmo->m_state, &gizmoTransform, is_local);
         if (!is_local)
         {
-            r = falg::QuaternionMulR(gizmoTransform.rotation, gizmo->m_state.original.rotation);
+            r = falg::QuaternionMul(
+                gizmo->m_state.original.rotation,
+                gizmoTransform.rotation);
         }
         else
         {
