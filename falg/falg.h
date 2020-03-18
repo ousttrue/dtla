@@ -102,7 +102,7 @@ struct xyzw
     float z;
     float w;
 };
-struct mat4
+struct row_matrix
 {
     float _11;
     float _12;
@@ -267,8 +267,6 @@ inline T Cross(const T &lhs, const T &rhs)
     return size_cast<T>(value);
 }
 
-//
-
 inline float Dot4(const float *row, const float *col, int step = 1)
 {
     auto i = 0;
@@ -282,6 +280,21 @@ inline float Dot4(const float *row, const float *col, int step = 1)
     auto value = a + b + c + d;
     return value;
 }
+
+template <typename M, typename T>
+float3 RowMatrixApplyPosition(const M &_m, const T &_t)
+{
+    auto m = size_cast<row_matrix>(_m);
+    auto &t = size_cast<xyz>(_t);
+    std::array<float, 4> v = {t.x, t.y, t.z, 1};
+    return {
+        Dot4(v.data(), &m._11, 4),
+        Dot4(v.data(), &m._12, 4),
+        Dot4(v.data(), &m._13, 4)
+    };
+}
+
+//
 
 inline std::array<float, 16> RowMatrixMul(const std::array<float, 16> &l, const std::array<float, 16> &r)
 {
@@ -683,7 +696,7 @@ static_assert(sizeof(TRS) == 40, "TRS");
 template <typename T>
 TRS RowMatrixDecompose(const T &_m)
 {
-    auto &m = size_cast<mat4>(_m);
+    auto &m = size_cast<row_matrix>(_m);
     auto s1 = Length(float3{m._11, m._12, m._13});
     auto s2 = Length(float3{m._21, m._22, m._23});
     auto s3 = Length(float3{m._31, m._32, m._33});
