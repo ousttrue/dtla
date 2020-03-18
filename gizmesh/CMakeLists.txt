@@ -2,8 +2,8 @@ set(TARGET_NAME gizmesh)
 add_library(${TARGET_NAME}
     gizmesh.cpp
     geometry_mesh.cpp
-    gizmo_position.cpp
-    gizmo_orientation.cpp
+    gizmo_translation.cpp
+    gizmo_rotation.cpp
     gizmo_scale.cpp
     )
 set_property(TARGET ${TARGET_NAME}
