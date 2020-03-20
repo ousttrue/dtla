@@ -246,6 +246,7 @@ bool Win32Window::Update(ScreenState *pState)
     }
     else
     {
+        m_startTime = now;
         now = 0;
     }
     if (now > m_lastTime)
@@ -257,7 +258,6 @@ bool Win32Window::Update(ScreenState *pState)
     else
     {
         // work around
-        m_startTime = now;
         m_state.DeltaSeconds = 0.016f;
         m_state.ElapsedSeconds = 0.016f;
     }
