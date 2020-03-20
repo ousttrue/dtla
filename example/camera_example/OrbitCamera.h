@@ -22,6 +22,7 @@ struct OrbitCamera
     int prevMouseX = -1;
     int prevMouseY = -1;
 
+    std::array<float, 3> gaze{};
     std::array<float, 3> shift{0, 0.2f, -4};
     float yawRadians = 0;
     float pitchRadians = 0;
