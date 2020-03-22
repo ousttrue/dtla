@@ -24,6 +24,8 @@ namespace screenstate
 Win32Window::Win32Window(const wchar_t *className)
     : m_className(className), m_hInstance(GetModuleHandle(NULL))
 {
+    QueryPerformanceFrequency(&m_freq);
+    m_freqInv = 1.0 / m_freq.QuadPart;
 }
 
 Win32Window::~Win32Window()
@@ -239,21 +241,22 @@ bool Win32Window::TryGetInput(ScreenState *pState)
         return false;
     }
 
-    auto now = timeGetTime();
-    if (m_startTime)
+    LARGE_INTEGER now;
+    QueryPerformanceCounter(&now);
+    if (m_startTime.QuadPart)
     {
-        now -= m_startTime;
+        now.QuadPart -= m_startTime.QuadPart;
     }
     else
     {
-        m_startTime = now;
-        now = 0;
+        m_startTime.QuadPart = now.QuadPart;
+        now.QuadPart = 0;
     }
-    if (now > m_lastTime)
+    if (now.QuadPart > m_lastTime.QuadPart)
     {
-        m_state.ElapsedSeconds = now * 0.001f;
-        auto delta = now - m_lastTime;
-        m_state.DeltaSeconds = delta * 0.001f;
+        m_state.ElapsedSeconds = now.QuadPart * m_freqInv;
+        auto delta = now.QuadPart - m_lastTime.QuadPart;
+        m_state.DeltaSeconds = delta * m_freqInv;
     }
     else
     {

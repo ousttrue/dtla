@@ -12,9 +12,12 @@ class Win32Window
     ScreenState m_state{};
     std::wstring m_className;
     HINSTANCE m_hInstance;
-    UINT m_lastTime = 0;
-    UINT m_startTime = 0;
     bool m_enableSetCursor = true;
+
+    LARGE_INTEGER m_freq;
+    float m_freqInv;
+    LARGE_INTEGER m_lastTime{};
+    LARGE_INTEGER m_startTime{};
 
 public:
     Win32Window(const wchar_t *className);
