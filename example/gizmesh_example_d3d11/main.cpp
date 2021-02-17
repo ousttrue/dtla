@@ -90,8 +90,13 @@ int main(int argc, char *argv[])
     //
     screenstate::ScreenState state;
     std::bitset<128> lastState{};
-    for (int i = 0; win.Update(&state); ++i)
+    for (int i = 0;; ++i)
     {
+        if (!win.TryGetInput(&state))
+        {
+            exit(1);
+        }
+
         // update camera
         camera.Update(state);
 

@@ -16,6 +16,7 @@
 #include <vector>
 #include <array>
 #include <exception>
+#include <stdexcept>
 #include <stdio.h>
 
 void gl_check_error(const char *file, int32_t line);
