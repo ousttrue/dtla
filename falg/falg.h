@@ -695,6 +695,9 @@ struct TRS
 static_assert(sizeof(TRS) == 40, "TRS");
 
 template <typename T>
+std::array<float, 4> RowMatrixToQuaternion(const T &m);
+
+template <typename T>
 TRS RowMatrixDecompose(const T &_m)
 {
     auto &m = size_cast<row_matrix>(_m);
