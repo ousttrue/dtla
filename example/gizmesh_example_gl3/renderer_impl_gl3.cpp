@@ -1,7 +1,8 @@
-#include "renderer.h"
-#include "wgl_context.h"
-#include "teapot.h"
 #include "gl-api.hpp"
+#include "renderer.h"
+#include "teapot.h"
+#include "wgl_context.h"
+
 
 constexpr const char gizmo_vert[] = R"(#version 330
     layout(location = 0) in vec3 vertex;
@@ -82,162 +83,123 @@ constexpr const char lit_frag[] = R"(#version 330
     }
 )";
 
-class ModelImpl
-{
-    std::unique_ptr<GlShader> m_shader;
-    GlMesh m_mesh;
+class ModelImpl {
+  std::unique_ptr<GlShader> m_shader;
+  GlMesh m_mesh;
 
 public:
-    void upload_mesh(
-        const void *pVertices, uint32_t verticesBytes, uint32_t vertexStride,
-        const void *pIndices, uint32_t indicesBytes, uint32_t indexStride,
-        bool isDynamic = false)
-    {
-        if (!m_shader)
-        {
-            if (isDynamic)
-            {
-                m_shader.reset(new GlShader(gizmo_vert, gizmo_frag));
-            }
-            else
-            {
-                m_shader.reset(new GlShader(lit_vert, lit_frag));
-            }
-        }
-
-        m_mesh.set_vertex_data(verticesBytes, pVertices, isDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
-        m_mesh.set_attribute(0, 3, GL_FLOAT, GL_FALSE, vertexStride, (GLvoid *)0);
-        m_mesh.set_attribute(1, 3, GL_FLOAT, GL_FALSE, vertexStride, (GLvoid *)12);
-        m_mesh.set_attribute(2, 4, GL_FLOAT, GL_FALSE, vertexStride, (GLvoid *)24);
-
-        GLenum type;
-        switch (indexStride)
-        {
-        case 2:
-            type = GL_UNSIGNED_SHORT;
-            break;
-        case 4:
-            type = GL_UNSIGNED_INT;
-            break;
-        default:
-            throw;
-        }
-        m_mesh.set_index_data(GL_TRIANGLES, type,
-                              indicesBytes / indexStride, pIndices,
-                              isDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+  void upload_mesh(const void *pVertices, uint32_t verticesBytes,
+                   uint32_t vertexStride, const void *pIndices,
+                   uint32_t indicesBytes, uint32_t indexStride,
+                   bool isDynamic = false) {
+    if (!m_shader) {
+      if (isDynamic) {
+        m_shader.reset(new GlShader(gizmo_vert, gizmo_frag));
+      } else {
+        m_shader.reset(new GlShader(lit_vert, lit_frag));
+      }
     }
 
-    void draw(const float *eye, const float *viewProj, const float *model, bool isGizmo = false)
-    {
-        if (isGizmo)
-        {
-            glClear(GL_DEPTH_BUFFER_BIT);
-        }
-        m_shader->bind();
-        m_shader->uniform_float16("u_viewProj", viewProj);
-        m_shader->uniform_float16("u_modelMatrix", model);
-        m_shader->uniform_float3("u_eye", eye);
-        m_mesh.draw_elements();
-        m_shader->unbind();
+    m_mesh.set_vertex_data(verticesBytes, pVertices,
+                           isDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+    m_mesh.set_attribute(0, 3, GL_FLOAT, GL_FALSE, vertexStride, (GLvoid *)0);
+    m_mesh.set_attribute(1, 3, GL_FLOAT, GL_FALSE, vertexStride, (GLvoid *)12);
+    m_mesh.set_attribute(2, 4, GL_FLOAT, GL_FALSE, vertexStride, (GLvoid *)24);
+
+    GLenum type;
+    switch (indexStride) {
+    case 2:
+      type = GL_UNSIGNED_SHORT;
+      break;
+    case 4:
+      type = GL_UNSIGNED_INT;
+      break;
+    default:
+      throw;
     }
+    m_mesh.set_index_data(GL_TRIANGLES, type, indicesBytes / indexStride,
+                          pIndices,
+                          isDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+  }
+
+  void draw(const float *eye, const float *viewProj, const float *model,
+            bool isGizmo = false) {
+    if (isGizmo) {
+      glClear(GL_DEPTH_BUFFER_BIT);
+    }
+    m_shader->bind();
+    m_shader->uniform_float16("u_viewProj", viewProj);
+    m_shader->uniform_float16("u_modelMatrix", model);
+    m_shader->uniform_float3("u_eye", eye);
+    m_mesh.draw_elements();
+    m_shader->unbind();
+  }
 };
 
-Model::Model(ModelImpl *impl)
-    : m_impl(impl)
-{
+Model::Model(ModelImpl *impl) : m_impl(impl) {}
+
+Model::~Model() { delete m_impl; }
+
+void Model::uploadMesh(void *, const void *vertices, uint32_t verticesSize,
+                       uint32_t vertexStride, const void *indices,
+                       uint32_t indicesSize, uint32_t indexSize,
+                       bool is_dynamic) {
+  m_impl->upload_mesh(vertices, verticesSize, vertexStride, indices,
+                      indicesSize, indexSize, is_dynamic);
 }
 
-Model::~Model()
-{
-    delete m_impl;
-}
-
-void Model::uploadMesh(void *,
-                       const void *vertices, uint32_t verticesSize, uint32_t vertexStride,
-                       const void *indices, uint32_t indicesSize, uint32_t indexSize,
-                       bool is_dynamic)
-{
-    m_impl->upload_mesh(
-        vertices, verticesSize, vertexStride,
-        indices, indicesSize, indexSize,
-        is_dynamic);
-}
-
-void Model::draw(void *, const float *model, const float *vp, const float *eye)
-{
-    m_impl->draw(eye, vp, model);
+void Model::draw(void *, const float *model, const float *vp,
+                 const float *eye) {
+  m_impl->draw(eye, vp, model);
 }
 
 /////////////////////////////////////////////
-class RendererImpl
-{
-    WGLContext m_wgl;
+class RendererImpl {
+  WGLContext m_wgl;
 
 public:
-    bool initialize(void *hwnd)
-    {
-        if (!m_wgl.Create(hwnd, 3, 0))
-        {
-            return false;
-        }
-        return true;
+  bool initialize(void *hwnd) {
+    if (!m_wgl.Create(hwnd, 3, 0)) {
+      return false;
     }
+    return true;
+  }
 
-    void beginFrame(int width, int height)
-    {
-        glViewport(0, 0, width, height);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glClearColor(0.725f, 0.725f, 0.725f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
+  void beginFrame(int width, int height) {
+    glViewport(0, 0, width, height);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0.725f, 0.725f, 0.725f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
 
-    void clearDepth()
-    {
-        glClear(GL_DEPTH_BUFFER_BIT);
-    }
+  void clearDepth() { glClear(GL_DEPTH_BUFFER_BIT); }
 
-    void endFrame()
-    {
-        gl_check_error(__FILE__, __LINE__);
-        m_wgl.Present();
-    }
+  void endFrame() {
+    gl_check_error(__FILE__, __LINE__);
+    m_wgl.Present();
+  }
 };
 
-Renderer::Renderer()
-    : m_impl(new RendererImpl)
-{
+Renderer::Renderer() : m_impl(new RendererImpl) {}
+
+Renderer::~Renderer() { delete m_impl; }
+
+void *Renderer::initialize(void *hwnd) {
+  return m_impl->initialize(hwnd) ? this : nullptr;
 }
 
-Renderer::~Renderer()
-{
-    delete m_impl;
+std::shared_ptr<Model> Renderer::createMesh() {
+  auto modelImpl = new ModelImpl();
+  return std::make_shared<Model>(modelImpl);
 }
 
-void *Renderer::initialize(void *hwnd)
-{
-    return m_impl->initialize(hwnd) ? this : nullptr;
+void *Renderer::beginFrame(int width, int height) {
+  m_impl->beginFrame(width, height);
+  return nullptr;
 }
 
-std::shared_ptr<Model> Renderer::createMesh()
-{
-    auto modelImpl = new ModelImpl();
-    return std::make_shared<Model>(modelImpl);
-}
+void Renderer::endFrame() { m_impl->endFrame(); }
 
-void *Renderer::beginFrame(int width, int height)
-{
-    m_impl->beginFrame(width, height);
-    return nullptr;
-}
-
-void Renderer::endFrame()
-{
-    m_impl->endFrame();
-}
-
-void Renderer::clearDepth()
-{
-    m_impl->clearDepth();
-}
+void Renderer::clearDepth() { m_impl->clearDepth(); }
