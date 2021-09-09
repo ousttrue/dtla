@@ -1,13 +1,12 @@
 project(gizmesh)
 cmake_minimum_required(VERSION 3.0.0)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release/bin)
+
 set(EXTERNAL_DIR ${CMAKE_CURRENT_LIST_DIR}/external)
-subdirs(
-    falg
-    falg_tests
-    example/window_example
-    example/camera_example
-    gizmesh
-    example/gizmesh_example_d3d11
-    _external
-    example/gizmesh_example_gl3
-    )
+subdirs(_external falg falg_tests example gizmesh)
