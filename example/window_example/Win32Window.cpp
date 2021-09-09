@@ -25,7 +25,7 @@ Win32Window::Win32Window(const wchar_t *className)
     : m_className(className), m_hInstance(GetModuleHandle(NULL))
 {
     QueryPerformanceFrequency(&m_freq);
-    m_freqInv = 1.0 / m_freq.QuadPart;
+    m_freqInv = 1.0f / m_freq.QuadPart;
 }
 
 Win32Window::~Win32Window()
