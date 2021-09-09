@@ -8,4 +8,5 @@ target_include_directories(${TARGET_NAME} PRIVATE
     )
 target_link_libraries(${TARGET_NAME} PRIVATE
     gizmesh
+    catch2
     )   

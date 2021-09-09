@@ -8,6 +8,6 @@ subdirs(
     example/camera_example
     gizmesh
     example/gizmesh_example_d3d11
-    external/glew-2.1.0
+    _external
     example/gizmesh_example_gl3
     )
