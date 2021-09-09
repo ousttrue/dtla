@@ -9,4 +9,4 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release/bin)
 
 set(EXTERNAL_DIR ${CMAKE_CURRENT_LIST_DIR}/external)
-subdirs(_external falg falg_tests example gizmesh)
+subdirs(_external falg gizmesh example)
