@@ -144,14 +144,14 @@ LRESULT CALLBACK Win32Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam,
 
 HWND Win32Window::Create(const wchar_t *titleName, int width, int height) {
   // Initialize the window class.
-  WNDCLASSEXW windowClass = {
-      .cbSize = (UINT)sizeof(WNDCLASSEXW),
-      .style = CS_HREDRAW | CS_VREDRAW,
-      .lpfnWndProc = WindowProc,
-      .hInstance = m_hInstance,
-      .hCursor = LoadCursor(NULL, IDC_ARROW),
-      .lpszClassName = m_className.c_str(),
-  };
+  WNDCLASSEXW windowClass = {0};
+  windowClass.cbSize = (UINT)sizeof(WNDCLASSEXW);
+  windowClass.style = CS_HREDRAW | CS_VREDRAW;
+  windowClass.lpfnWndProc = WindowProc;
+  windowClass.hInstance = m_hInstance;
+  windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+  windowClass.lpszClassName = m_className.c_str();
+
   if (!RegisterClassExW(&windowClass)) {
     return NULL;
   }

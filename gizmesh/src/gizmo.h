@@ -36,11 +36,10 @@ public:
   void begin(const GizmoComponent *pMesh, const falg::float3 &offset,
              const falg::TRS &t, const falg::float3 &axis) {
     m_active = pMesh;
-    m_state = {
-        .original = t,
-        .offset = offset,
-        .axis = axis,
-    };
+    m_state = {};
+    m_state.original = t;
+    m_state.offset = offset;
+    m_state.axis = axis;
   }
 };
 

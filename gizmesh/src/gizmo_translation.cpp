@@ -45,12 +45,12 @@ static bool axisDragger(const GizmoComponent &component,
 static falg::float2 arrow_points[] = {
     {0.25f, 0}, {0.25f, 0.05f}, {1, 0.05f}, {1, 0.10f}, {1.2f, 0}};
 
-static GizmoComponent componentX{.mesh = geometry_mesh::make_lathed_geometry(
-                                     {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 16,
-                                     arrow_points, _countof(arrow_points)),
-                                 .base_color = {1, 0.5f, 0.5f, 1.f},
-                                 .highlight_color = {1, 0, 0, 1.f},
-                                 .axis = {1, 0, 0}};
+static GizmoComponent componentX{
+    geometry_mesh::make_lathed_geometry({1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 16,
+                                        arrow_points, _countof(arrow_points)),
+    {1, 0.5f, 0.5f, 1.f},
+    {1, 0, 0, 1.f},
+    {1, 0, 0}};
 static GizmoComponent componentY{
     geometry_mesh::make_lathed_geometry({0, 1, 0}, {0, 0, 1}, {1, 0, 0}, 16,
                                         arrow_points, _countof(arrow_points)),
@@ -110,8 +110,8 @@ static void draw(Gizmo &gizmo, gizmo_system_impl *impl,
                  const falg::Transform &t) {
   for (auto c : translation_components) {
     gizmo_renderable r{
-        .mesh = c->mesh,
-        .color = (c == gizmo.active()) ? c->base_color : c->highlight_color,
+        c->mesh,
+        (c == gizmo.active()) ? c->base_color : c->highlight_color,
     };
     for (auto &v : r.mesh.vertices) {
       v.position = t.ApplyPosition(

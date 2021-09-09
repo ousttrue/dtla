@@ -11,7 +11,6 @@
 #include <vector>
 #include <wrl/client.h>
 
-
 template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 struct Vertex {
@@ -172,11 +171,11 @@ public:
     }
 
     {
-      D3D11_BUFFER_DESC desc = {
-          .ByteWidth = sizeof(ConstantBuffer),
-          .Usage = D3D11_USAGE_DEFAULT,
-          .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-      };
+      D3D11_BUFFER_DESC desc = {0};
+      desc.ByteWidth = sizeof(ConstantBuffer);
+      desc.Usage = D3D11_USAGE_DEFAULT;
+      desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
       // desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
       if (FAILED(device->CreateBuffer(&desc, nullptr, &m_cb))) {
         return false;
@@ -184,11 +183,11 @@ public:
     }
 
     {
-      D3D11_RASTERIZER_DESC rasterizerDesc = {
-          .FillMode = D3D11_FILL_SOLID,
-          .CullMode = D3D11_CULL_BACK,
-          .FrontCounterClockwise = true,
-      };
+      D3D11_RASTERIZER_DESC rasterizerDesc = {};
+      rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+      rasterizerDesc.CullMode = D3D11_CULL_BACK;
+      rasterizerDesc.FrontCounterClockwise = true;
+
       if (FAILED(device->CreateRasterizerState(&rasterizerDesc,
                                                &m_rasterizerState))) {
         return false;
@@ -204,11 +203,11 @@ public:
     if (!m_vs) {
       return;
     }
-    ConstantBuffer data{
-        .model = model,
-        .viewProjection = viewProj,
-        .eye = eye,
-    };
+    ConstantBuffer data{0};
+    data.model = model;
+    data.viewProjection = viewProj;
+    data.eye = eye;
+
     context->UpdateSubresource(m_cb.Get(), 0, nullptr, &data, 0, 0);
 
     ID3D11Buffer *cb_list[] = {m_cb.Get()};
@@ -249,12 +248,12 @@ public:
       }
     }
     if (!m_vb) {
-      D3D11_BUFFER_DESC desc{
-          .ByteWidth = sizeof(Vertex) * 65535,
-          .Usage = D3D11_USAGE_DYNAMIC,
-          .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-          .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-      };
+      D3D11_BUFFER_DESC desc{0};
+      desc.ByteWidth = sizeof(Vertex) * 65535;
+      desc.Usage = D3D11_USAGE_DYNAMIC;
+      desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+      desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
       if (FAILED(device->CreateBuffer(&desc, nullptr, &m_vb))) {
         return;
       }
@@ -278,12 +277,12 @@ public:
       default:
         throw;
       }
-      D3D11_BUFFER_DESC desc = {
-          .ByteWidth = indexStride * 65535,
-          .Usage = D3D11_USAGE_DYNAMIC,
-          .BindFlags = D3D11_BIND_INDEX_BUFFER,
-          .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-      };
+      D3D11_BUFFER_DESC desc = {0};
+      desc.ByteWidth = indexStride * 65535;
+      desc.Usage = D3D11_USAGE_DYNAMIC;
+      desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+      desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
       if (FAILED(device->CreateBuffer(&desc, nullptr, &m_ib))) {
         return;
       }
@@ -308,14 +307,14 @@ public:
       }
     }
     if (!m_vb) {
-      D3D11_BUFFER_DESC desc{
-          .ByteWidth = verticesBytes,
-          .Usage = D3D11_USAGE_IMMUTABLE,
-          .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-      };
-      D3D11_SUBRESOURCE_DATA subRes = {
-          .pSysMem = pVertices,
-      };
+      D3D11_BUFFER_DESC desc{0};
+      desc.ByteWidth = verticesBytes;
+      desc.Usage = D3D11_USAGE_IMMUTABLE;
+      desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+      D3D11_SUBRESOURCE_DATA subRes = {0};
+      subRes.pSysMem = pVertices;
+
       if (FAILED(device->CreateBuffer(&desc, &subRes, &m_vb))) {
         return;
       }
@@ -332,14 +331,14 @@ public:
       default:
         throw;
       }
-      D3D11_BUFFER_DESC desc = {
-          .ByteWidth = indicesBytes,
-          .Usage = D3D11_USAGE_IMMUTABLE,
-          .BindFlags = D3D11_BIND_INDEX_BUFFER,
-      };
-      D3D11_SUBRESOURCE_DATA subRes = {
-          .pSysMem = pIndices,
-      };
+      D3D11_BUFFER_DESC desc = {0};
+      desc.ByteWidth = indicesBytes;
+      desc.Usage = D3D11_USAGE_IMMUTABLE;
+      desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+      D3D11_SUBRESOURCE_DATA subRes = {0};
+      subRes.pSysMem = pIndices;
+
       if (FAILED(device->CreateBuffer(&desc, &subRes, &m_ib))) {
         return;
       }

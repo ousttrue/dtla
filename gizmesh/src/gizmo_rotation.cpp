@@ -98,8 +98,8 @@ static void draw_global_active(std::vector<gizmo_renderable> &drawlist,
   // and draw an arrow from the center of the gizmo to indicate the degree of
   // rotation
   gizmo_renderable r{
-      .mesh = active->mesh,
-      .color = active->base_color,
+      active->mesh,
+      active->base_color,
   };
   for (auto &v : r.mesh.vertices) {
     v.position = gizmoTransform.ApplyPosition(
@@ -140,8 +140,8 @@ static void draw(std::vector<gizmo_renderable> &drawlist,
                  const GizmoComponent *active) {
   for (auto mesh : orientation_components) {
     gizmo_renderable r{
-        .mesh = mesh->mesh,
-        .color = (mesh == active) ? mesh->base_color : mesh->highlight_color,
+        mesh->mesh,
+        (mesh == active) ? mesh->base_color : mesh->highlight_color,
     };
     for (auto &v : r.mesh.vertices) {
       v.position = gizmoTransform.ApplyPosition(v.position);

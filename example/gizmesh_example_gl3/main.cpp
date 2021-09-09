@@ -46,10 +46,10 @@ int main(int argc, char *argv[]) {
   auto teapot_mesh = renderer.createMesh();
   std::vector<vertex> vertices;
   for (int i = 0; i < 4974; i += 6) {
-    vertex v{.position{teapot_vertices[i + 0], teapot_vertices[i + 1],
-                       teapot_vertices[i + 2]},
-             .normal{teapot_vertices[i + 3], teapot_vertices[i + 4],
-                     teapot_vertices[i + 5]}};
+    vertex v{{teapot_vertices[i + 0], teapot_vertices[i + 1],
+              teapot_vertices[i + 2]},
+             {teapot_vertices[i + 3], teapot_vertices[i + 4],
+              teapot_vertices[i + 5]}};
     vertices.push_back(v);
   }
   teapot_mesh->uploadMesh(

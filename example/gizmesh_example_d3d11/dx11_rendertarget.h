@@ -64,16 +64,13 @@ struct Dx11RenderTarget {
     // set backbuffer & depthbuffer
     ID3D11RenderTargetView *rtv_list[] = {m_rtv.Get()};
     context->OMSetRenderTargets(1, rtv_list, m_dsv.Get());
-    D3D11_VIEWPORT viewports[] = {
-        {
-            .TopLeftX = 0,
-            .TopLeftY = 0,
-            .Width = (float)width,
-            .Height = (float)height,
-            .MinDepth = 0,
-            .MaxDepth = 1.0f,
-        },
-    };
+    D3D11_VIEWPORT viewports[1] = {{0}};
+    viewports[0].TopLeftX = 0;
+    viewports[0].TopLeftY = 0;
+    viewports[0].Width = (float)width;
+    viewports[0].Height = (float)height;
+    viewports[0].MinDepth = 0;
+    viewports[0].MaxDepth = 1.0f;
     context->RSSetViewports(_countof(viewports), viewports);
   }
 

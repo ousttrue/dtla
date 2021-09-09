@@ -92,9 +92,8 @@ static void draw(const falg::Transform &t,
                  const GizmoComponent *activeMesh) {
   for (auto mesh : g_meshes) {
     gizmo_renderable r{
-        .mesh = mesh->mesh,
-        .color =
-            (mesh == activeMesh) ? mesh->base_color : mesh->highlight_color,
+        mesh->mesh,
+        (mesh == activeMesh) ? mesh->base_color : mesh->highlight_color,
     };
     for (auto &v : r.mesh.vertices) {
       // transform local coordinates into worldspace
