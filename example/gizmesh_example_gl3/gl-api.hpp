@@ -29,7 +29,7 @@ class GlObject
 
 public:
     GlObject() {}
-    GlObject(GLuint h) : handle(g) {}
+    GlObject(GLuint h) : handle(h) {}
     ~GlObject()
     {
         if (handle)
