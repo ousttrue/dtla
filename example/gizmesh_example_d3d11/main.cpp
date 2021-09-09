@@ -2,8 +2,12 @@
 #include "Win32Window.h"
 #include "renderer.h"
 #include "teapot.h"
+#include <d3d11.h>
 #include <gizmesh.h>
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
 #include <vector>
+#include <wrl/client.h>
 
 struct vertex {
   std::array<float, 3> position;
@@ -38,10 +42,17 @@ int main(int argc, char *argv[]) {
   // scene
   //
   Renderer renderer;
-  auto device = renderer.initialize(hwnd);
+  auto device = (ID3D11Device *)renderer.initialize(hwnd);
   if (!device) {
     return 3;
   }
+
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
+  device->GetImmediateContext(&context);
+  ImGui_ImplDX11_Init(device, context.Get());
 
   // create teapot
   auto teapot_mesh = renderer.createMesh();
@@ -81,6 +92,16 @@ int main(int argc, char *argv[]) {
     if (!win.TryGetInput(&state)) {
       exit(1);
     }
+
+    // Start the Dear ImGui frame
+    ImGui_ImplDX11_NewFrame();
+    // ImGui_ImplWin32_NewFrame();
+    ImGuiIO &io = ImGui::GetIO();
+    io.DisplaySize = ImVec2(state.Width, state.Height);
+
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow();
+    ImGui::Render();
 
     // update camera
     camera.Update(state);
@@ -167,10 +188,14 @@ int main(int argc, char *argv[]) {
     gizmo_mesh->draw(context, identity4x4, viewProjection.data(),
                      camera.state.position.data());
 
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
     //
     // present
     //
     renderer.endFrame();
   }
+
+  ImGui_ImplDX11_Shutdown();
   return EXIT_SUCCESS;
 }
