@@ -6,7 +6,6 @@
 #ifndef gl_api_hpp
 #define gl_api_hpp
 
-#define GLEW_STATIC
 #define GL_GLEXT_PROTOTYPES
 #include <GL/glew.h>
 
