@@ -1,5 +1,5 @@
 set(TARGET_NAME gizmesh_example_d3d11)
-add_executable(${TARGET_NAME} main.cpp renderer_impl_d3d11.cpp dx11_context.cpp)
+add_executable(${TARGET_NAME} main.cpp shader.cpp renderer_impl_d3d11.cpp dx11_context.cpp)
 
 target_include_directories(${TARGET_NAME}
                            PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../common)

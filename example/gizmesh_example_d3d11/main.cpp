@@ -72,6 +72,13 @@ static void ShowExampleAppSimpleOverlay() {
   ImGui::End();
 }
 
+// https://docs.microsoft.com/en-us/windows/win32/direct3d11/geometry-shader-stage
+class Geom {
+public:
+  Geom(ID3D11Device *device) {}
+  void Draw(int x, int y) {}
+};
+
 //////////////////////////
 //   Main Application   //
 //////////////////////////
@@ -96,6 +103,8 @@ int main(int argc, char *argv[]) {
   if (!device) {
     return 3;
   }
+
+  Geom geom(device);
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
@@ -219,6 +228,8 @@ int main(int argc, char *argv[]) {
             teapot_b.translation, teapot_b.rotation, teapot_b.scale);
         break;
       }
+
+      geom.Draw(state.MouseX, state.MouseY);
 
       auto buffer = system.end();
       gizmo_mesh->uploadMesh(device, buffer.pVertices, buffer.verticesBytes,
