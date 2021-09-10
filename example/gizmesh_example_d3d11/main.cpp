@@ -73,13 +73,95 @@ static void ShowExampleAppSimpleOverlay() {
   ImGui::End();
 }
 
+constexpr const char geom_shader[] = R"(
+  void vsMain()
+  {
+  }
+
+  struct DummyInput {};
+  struct GS_OUTPUT
+  {
+    float4 position: SV_POSITION;
+    float4 color: COLOR0;
+  };    
+
+  [maxvertexcount(6)]
+  void gsMain(
+    point DummyInput input[1] : POSITION,
+    inout TriangleStream< GS_OUTPUT > output
+  ){
+    GS_OUTPUT element;
+
+    // 0
+    element.position = float4(-1, -1, 0, 1);
+    element.color = float4(1, 0, 0, 1);
+    output.Append(element);
+    // 1
+    element.position = float4(1, -1, 0, 1);
+    element.color = float4(0, 1, 0, 1);
+    output.Append(element);
+    // 2
+    element.position = float4(1, 1, 0, 1);
+    element.color = float4(0, 0, 1, 1);
+    output.Append(element);
+    output.RestartStrip();
+    
+    // 3
+    element.position = float4(1, 1, 0, 1);
+    element.color = float4(0, 1, 1, 1);
+    output.Append(element);
+    // 4
+    element.position = float4(-1, 1, 0, 1);
+    element.color = float4(1, 0, 1, 1);
+    output.Append(element);
+    // 5
+    element.position = float4(-1, -1, 0, 1);
+    element.color = float4(1, 1, 0, 1);
+    output.Append(element);
+    output.RestartStrip();
+  }  
+
+	cbuffer cbContextData : register(b0)
+	{
+    float4 mouse;
+	};
+	float4 psMain(GS_OUTPUT V): SV_Target
+  {
+    return V.color;
+  }
+)";
 // https://docs.microsoft.com/en-us/windows/win32/direct3d11/geometry-shader-stage
+
+struct xywh {
+  float x;
+  float y;
+  float w;
+  float h;
+};
+
 class Geom {
   Shader m_shader;
 
 public:
-  bool Initialize(ID3D11Device *device) { return false; }
-  void Draw(int x, int y) {}
+  bool Initialize(ID3D11Device *device) {
+
+    if (!m_shader.initialize(
+            device, SourceWithEntryPoint{geom_shader, "vsMain", sizeof(xywh)},
+            SourceWithEntryPoint{geom_shader, "gsMain"},
+            SourceWithEntryPoint{geom_shader, "psMain"})) {
+      return false;
+    }
+
+    return true;
+  }
+  void Draw(ID3D11DeviceContext *context, int x, int y, int w, int h) {
+    xywh data{static_cast<float>(x), static_cast<float>(y),
+              static_cast<float>(w), static_cast<float>(h)};
+    m_shader.setup(context, &data, (uint32_t)sizeof(data));
+    context->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+    context->Draw(1, 0);
+  }
 };
 
 //////////////////////////
@@ -196,7 +278,8 @@ int main(int argc, char *argv[]) {
     //
     // draw
     //
-    auto context = renderer.beginFrame(state.Width, state.Height);
+    auto context =
+        (ID3D11DeviceContext *)renderer.beginFrame(state.Width, state.Height);
     teapot_mesh->draw(context, teapot_a.RowMatrix().data(),
                       viewProjection.data(), camera.state.position.data());
     teapot_mesh->draw(context, teapot_b.RowMatrix().data(),
@@ -235,8 +318,6 @@ int main(int argc, char *argv[]) {
         break;
       }
 
-      geom.Draw(state.MouseX, state.MouseY);
-
       auto buffer = system.end();
       gizmo_mesh->uploadMesh(device, buffer.pVertices, buffer.verticesBytes,
                              buffer.vertexStride, buffer.pIndices,
@@ -257,6 +338,8 @@ int main(int argc, char *argv[]) {
                      camera.state.position.data());
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+    geom.Draw(context, state.MouseX, state.MouseY, state.Width, state.Height);
 
     //
     // present

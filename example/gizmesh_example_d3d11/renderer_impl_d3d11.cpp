@@ -20,83 +20,91 @@ struct Vertex {
 };
 
 constexpr const char gizmo_shader[] = R"(
-    struct VS_INPUT
+  struct VS_INPUT
 	{
 		float3 position : POSITION;
-        float3 normal   : NORMAL;
+    float3 normal   : NORMAL;
 		float4 color    : COLOR0;
 	};
-    struct VS_OUTPUT
-    {
-        linear float4 position: SV_POSITION;
-        linear float3 normal  : NORMAL;
-        linear float4 color   : COLOR0;
-        linear float3 world   : POSITION;
-    };    
+  struct VS_OUTPUT
+  {
+    linear float4 position: SV_POSITION;
+    linear float3 normal  : NORMAL;
+    linear float4 color   : COLOR0;
+    linear float3 world   : POSITION;
+  };    
 	cbuffer cbContextData : register(b0)
 	{
 		float4x4 uModel;
 		float4x4 uViewProj;
-        float3 uEye;
+    float3 uEye;
 	};
     
-    VS_OUTPUT vsMain(VS_INPUT _in) 
-    {
-        VS_OUTPUT ret;
-        ret.world = mul(uModel, float4(_in.position, 1)).xyz;
-        ret.position = mul(uViewProj, float4(ret.world, 1));
-        ret.normal = _in.normal;
-        ret.color = _in.color;
-        return ret;
-    }
+  VS_OUTPUT vsMain(VS_INPUT _in) 
+  {
+    VS_OUTPUT ret;
+    ret.world = mul(uModel, float4(_in.position, 1)).xyz;
+    ret.position = mul(uViewProj, float4(ret.world, 1));
+    ret.normal = _in.normal;
+    ret.color = _in.color;
+    return ret;
+  }
 
 	float4 psMain(VS_OUTPUT _in): SV_Target
-    {
-        float3 light = float3(1, 1, 1) * max(dot(_in.normal, normalize(uEye - _in.world)), 0.50) + 0.25;
-        return _in.color * float4(light, 1);
-    }
+  {
+    float3 light = float3(1, 1, 1) * max(dot(_in.normal, normalize(uEye - _in.world)), 0.50) + 0.25;
+    return _in.color * float4(light, 1);
+  }
 )";
 
 constexpr const char lit_shader[] = R"(
-    struct VS_INPUT
+  struct VS_INPUT
 	{
 		float3 position : POSITION;
-        float3 normal   : NORMAL;
+    float3 normal   : NORMAL;
 		float4 color    : COLOR0;
 	};
-    struct VS_OUTPUT
-    {
-        linear float4 position: SV_POSITION;
-        linear float3 normal  : NORMAL;
-        linear float4 color   : COLOR0;
-        linear float3 world   : POSITION;
-    };    
+  struct VS_OUTPUT
+  {
+    linear float4 position: SV_POSITION;
+    linear float3 normal  : NORMAL;
+    linear float4 color   : COLOR0;
+    linear float3 world   : POSITION;
+  };    
 	cbuffer cbContextData : register(b0)
 	{
 		float4x4 uModel;
 		float4x4 uViewProj;
-        float3 uEye;
+    float3 uEye;
 	};
 
-    VS_OUTPUT vsMain(VS_INPUT _in) 
-    {
-        VS_OUTPUT ret;
-        ret.world = mul(uModel, float4(_in.position, 1)).xyz;
-        ret.position = mul(uViewProj, float4(ret.world, 1));
-        ret.normal = _in.normal;
-        ret.color = _in.color;
-        return ret;
-    }
+  VS_OUTPUT vsMain(VS_INPUT _in) 
+  {
+    VS_OUTPUT ret;
+    ret.world = mul(uModel, float4(_in.position, 1)).xyz;
+    ret.position = mul(uViewProj, float4(ret.world, 1));
+    ret.normal = _in.normal;
+    ret.color = _in.color;
+    return ret;
+  }
 
 	float4 psMain(VS_OUTPUT _in): SV_Target
-    {
-        float3 light = float3(0.5, 0.3, 0.3) * max(dot(_in.normal, normalize(uEye - _in.world)), 0.50) + 0.25;
-        // return _in.color * float4(light, 1);
-        return float4(light, 1);
-    }
+  {
+    float3 light = float3(0.5, 0.3, 0.3) * max(dot(_in.normal, normalize(uEye - _in.world)), 0.50) + 0.25;
+    // return _in.color * float4(light, 1);
+    return float4(light, 1);
+  }
 )";
 
 #include "shader.h"
+
+struct ConstantBuffer {
+  std::array<float, 16> model;
+  std::array<float, 16> viewProjection;
+  std::array<float, 3> eye;
+  float padding;
+};
+static_assert(sizeof(ConstantBuffer) == sizeof(float) * (16 * 2 + 4));
 
 class ModelImpl {
   std::unique_ptr<Shader> m_shader;
@@ -117,8 +125,9 @@ public:
 
     if (!m_shader) {
       m_shader.reset(new Shader);
-      if (!m_shader->initialize(device, {gizmo_shader, "vsMain"},
-                                {gizmo_shader, "psMain"})) {
+      if (!m_shader->initialize(
+              device, SourceWithEntryPoint{gizmo_shader, "vsMain", sizeof(ConstantBuffer)},
+              std::nullopt, SourceWithEntryPoint{gizmo_shader, "psMain"})) {
         return;
       }
     }
@@ -176,8 +185,9 @@ public:
                           uint32_t indexStride) {
     if (!m_shader) {
       m_shader.reset(new Shader);
-      if (!m_shader->initialize(device, {lit_shader, "vsMain"},
-                                {lit_shader, "psMain"})) {
+      if (!m_shader->initialize(
+              device, SourceWithEntryPoint{lit_shader, "vsMain", sizeof(ConstantBuffer)}, std::nullopt,
+              SourceWithEntryPoint{lit_shader, "psMain"})) {
         return;
       }
     }
@@ -230,7 +240,11 @@ public:
       return;
     }
 
-    m_shader->setup(context, eye, viewProj, model);
+    ConstantBuffer data{0};
+    data.model = model;
+    data.viewProjection = viewProj;
+    data.eye = eye;
+    m_shader->setup(context, &data, (uint32_t)sizeof(data));
 
     ID3D11Buffer *vbs[]{m_vb.Get()};
     UINT strides[]{sizeof(Vertex)};
