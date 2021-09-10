@@ -1,6 +1,7 @@
 ﻿#include "OrbitCamera.h"
 #include "Win32Window.h"
 #include "renderer.h"
+#include "shader.h"
 #include "teapot.h"
 #include <d3d11.h>
 #include <gizmesh.h>
@@ -74,8 +75,10 @@ static void ShowExampleAppSimpleOverlay() {
 
 // https://docs.microsoft.com/en-us/windows/win32/direct3d11/geometry-shader-stage
 class Geom {
+  Shader m_shader;
+
 public:
-  Geom(ID3D11Device *device) {}
+  bool Initialize(ID3D11Device *device) { return false; }
   void Draw(int x, int y) {}
 };
 
@@ -104,7 +107,10 @@ int main(int argc, char *argv[]) {
     return 3;
   }
 
-  Geom geom(device);
+  Geom geom;
+  if (!geom.Initialize(device)) {
+    return 4;
+  }
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();

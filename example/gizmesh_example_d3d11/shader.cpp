@@ -1,23 +1,23 @@
 #include "shader.h"
-#include <iostream>
 #include <d3dcompiler.h>
+#include <iostream>
 
 template <typename T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-static ComPtr<ID3DBlob> LoadCompileShader(const std::string &src,
+static ComPtr<ID3DBlob> LoadCompileShader(const SourceWithEntryPoint &src,
                                           const char *name,
-                                          const char *entryPoint,
                                           const D3D_SHADER_MACRO *define,
                                           const char *target) {
   UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 
   ComPtr<ID3DBlob> ret;
   ComPtr<ID3DBlob> err;
-  if (FAILED(D3DCompile(src.data(), src.size(), name, define, nullptr,
-                        entryPoint, target, flags, 0, &ret, &err))) {
+  if (FAILED(D3DCompile(src.source.data(), src.source.size(), name, define,
+                        nullptr, src.entry_point.data(), target, flags, 0, &ret,
+                        &err))) {
     auto error = (char *)err->GetBufferPointer();
     std::cerr << name << ": " << error << std::endl;
-    std::cerr << src << std::endl;
+    std::cerr << src.source << std::endl;
     return nullptr;
   }
   return ret;
@@ -31,11 +31,9 @@ struct ConstantBuffer {
 };
 static_assert(sizeof(ConstantBuffer) == sizeof(float) * (16 * 2 + 4));
 
-bool Shader::initialize(ID3D11Device *device, const std::string &vs,
-                        const std::string &vsEntryPoint, const std::string &ps,
-                        const std::string &psEntryPoint) {
-  auto vsBlob =
-      LoadCompileShader(vs, "vs", vsEntryPoint.c_str(), nullptr, "vs_4_0");
+bool Shader::initialize(ID3D11Device *device, const SourceWithEntryPoint &vs,
+                        const SourceWithEntryPoint &ps) {
+  auto vsBlob = LoadCompileShader(vs, "vs", nullptr, "vs_4_0");
   if (!vsBlob) {
     return false;
   }
@@ -60,7 +58,7 @@ bool Shader::initialize(ID3D11Device *device, const std::string &vs,
   }
 
   auto psBlob =
-      LoadCompileShader(ps, "ps", psEntryPoint.c_str(), nullptr, "ps_4_0");
+      LoadCompileShader(ps, "ps", nullptr, "ps_4_0");
   if (!psBlob) {
     return false;
   }

@@ -117,8 +117,8 @@ public:
 
     if (!m_shader) {
       m_shader.reset(new Shader);
-      if (!m_shader->initialize(device, gizmo_shader, "vsMain", gizmo_shader,
-                                "psMain")) {
+      if (!m_shader->initialize(device, {gizmo_shader, "vsMain"},
+                                {gizmo_shader, "psMain"})) {
         return;
       }
     }
@@ -176,8 +176,8 @@ public:
                           uint32_t indexStride) {
     if (!m_shader) {
       m_shader.reset(new Shader);
-      if (!m_shader->initialize(device, lit_shader, "vsMain", lit_shader,
-                                "psMain")) {
+      if (!m_shader->initialize(device, {lit_shader, "vsMain"},
+                                {lit_shader, "psMain"})) {
         return;
       }
     }
