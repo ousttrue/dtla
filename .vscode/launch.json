@@ -36,6 +36,17 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false
-        }
+        },
+        {
+            "name": "example_win32_directx11",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/Debug/bin/example_win32_directx11.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false
+        },
     ]
 }
